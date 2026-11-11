@@ -141,13 +141,13 @@ strong, b { font-weight: 700; }
 .burger .i { width: 24px; height: 24px; }
 
 /* Menu en ligne (6 liens) : format compact pour tenir dans la largeur du conteneur */
-@media (min-width: 1121px) {
+@media (min-width: 1200px) {
   .header-inner { gap: 20px; }
   .brand-text span { display: none; }
   .main-nav a:not(.btn) { padding: 8px 8px; font-size: .86rem; }
 }
 /* Menu « burger » dès que les 6 liens ne tiennent plus sur une ligne */
-@media (max-width: 1120px) {
+@media (max-width: 1199px) {
   .header-cta { margin-left: auto; }
   .burger { display: inline-flex; margin-left: 0; }
   .main-nav {

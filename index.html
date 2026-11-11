@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=3">
   <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
@@ -52,6 +52,7 @@
     <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
     <symbol id="i-checkcircle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></symbol>
   </defs>
 </svg>
@@ -117,6 +118,11 @@
   <section class="quick" aria-label="Accès rapides">
     <div class="container">
       <div class="quick-grid">
+        <a class="quick-card" href="#ambition" style="--c: var(--blue)">
+          <span class="quick-ico"><svg class="i"><use href="#i-flag"/></svg></span>
+          <span class="quick-txt"><strong>Notre ambition</strong><span>Un CSE au service du collectif</span></span>
+          <svg class="i quick-arrow"><use href="#i-arrow"/></svg>
+        </a>
         <a class="quick-card" href="#bilan" style="--c: var(--teal)">
           <span class="quick-ico"><svg class="i"><use href="#i-trend"/></svg></span>
           <span class="quick-txt"><strong>Notre bilan</strong><span>Des résultats concrets pour les salariés</span></span>
@@ -139,13 +145,13 @@
         </a>
       </div>
       <div class="doc-grid">
-        <a class="doc-btn doc-pink" href="assets/docs/profession-de-foi-cftc-irp-auto-2026.pdf" target="_blank" rel="noopener">
+        <a class="doc-btn doc-pink" href="assets/docs/cftc-profession-de-foi.pdf" target="_blank" rel="noopener">
           <svg class="i"><use href="#i-file"/></svg>
-          <span><strong>Notre profession de foi</strong><span>Consulter le PDF <svg class="i i-sm"><use href="#i-ext"/></svg></span></span>
+          <span><strong>Notre profession de foi</strong><span>Consulter le PDF · 3 pages <svg class="i i-sm"><use href="#i-ext"/></svg></span></span>
         </a>
-        <a class="doc-btn doc-blue" href="assets/docs/profession-de-foi-cftc-irp-auto-2026.pdf#page=4" target="_blank" rel="noopener">
+        <a class="doc-btn doc-blue" href="assets/docs/cftc-liste-candidats.pdf" target="_blank" rel="noopener">
           <svg class="i"><use href="#i-list"/></svg>
-          <span><strong>Notre liste de candidats</strong><span>Consulter le PDF <svg class="i i-sm"><use href="#i-ext"/></svg></span></span>
+          <span><strong>Notre liste de candidats</strong><span>Consulter le PDF · 1 page <svg class="i i-sm"><use href="#i-ext"/></svg></span></span>
         </a>
       </div>
     </div>
@@ -172,6 +178,9 @@
         </div>
       </div>
       <p class="ambition-punch reveal">Voter <span class="y">CFTC</span>, c'est <span class="y">choisir des élus de terrain</span> qui <span class="y">connaissent vos métiers</span>. Jouons collectif&nbsp;: ensemble, nous serons plus forts demain&nbsp;!</p>
+      <p class="ambition-pdf center reveal">
+        <a class="btn btn-ghost" href="assets/docs/cftc-notre-ambition.pdf" target="_blank" rel="noopener"><svg class="i i-sm"><use href="#i-file"/></svg> Voir cette partie en PDF <svg class="i i-sm"><use href="#i-ext"/></svg></a>
+      </p>
     </div>
   </section>
 
@@ -222,7 +231,7 @@
       </blockquote>
 
       <p class="center reveal">
-        <a class="btn btn-pink" href="assets/docs/profession-de-foi-cftc-irp-auto-2026.pdf" target="_blank" rel="noopener">Lire la profession de foi complète <svg class="i i-sm"><use href="#i-ext"/></svg></a>
+        <a class="btn btn-pink" href="assets/docs/cftc-notre-bilan.pdf" target="_blank" rel="noopener"><svg class="i i-sm"><use href="#i-file"/></svg> Voir notre bilan en PDF <svg class="i i-sm"><use href="#i-ext"/></svg></a>
       </p>
     </div>
   </section>
@@ -310,6 +319,10 @@
           </ul>
         </div>
       </article>
+
+      <p class="center section-pdf reveal">
+        <a class="btn btn-pink" href="assets/docs/cftc-nos-engagements.pdf" target="_blank" rel="noopener"><svg class="i i-sm"><use href="#i-file"/></svg> Voir nos engagements en PDF <svg class="i i-sm"><use href="#i-ext"/></svg></a>
+      </p>
     </div>
   </section>
 
@@ -440,6 +453,10 @@
         <li style="--c: var(--yellow)">Collège <b>Agents de maîtrise</b></li>
         <li style="--c: var(--teal)">Collège <b>Cadres</b></li>
       </ul>
+
+      <p class="center section-pdf reveal">
+        <a class="btn btn-blue" href="assets/docs/cftc-liste-candidats.pdf" target="_blank" rel="noopener"><svg class="i i-sm"><use href="#i-file"/></svg> Voir la liste des candidats en PDF <svg class="i i-sm"><use href="#i-ext"/></svg></a>
+      </p>
     </div>
   </section>
 
@@ -506,7 +523,7 @@
       <p>Voter CFTC, c'est choisir des élus de terrain qui connaissent vos métiers. Votez pour l'équipe CFTC dans son ensemble, sans raturer de nom&nbsp;: ensemble, nous serons plus forts demain&nbsp;!</p>
       <p class="vote-actions">
         <a class="btn btn-white" href="#equipe">Je découvre les candidats <svg class="i i-sm"><use href="#i-up"/></svg></a>
-        <a class="btn btn-ghost" href="assets/docs/profession-de-foi-cftc-irp-auto-2026.pdf" target="_blank" rel="noopener">Lire la profession de foi <svg class="i i-sm"><use href="#i-ext"/></svg></a>
+        <a class="btn btn-ghost" href="assets/docs/cftc-profession-de-foi.pdf" target="_blank" rel="noopener">Lire la profession de foi <svg class="i i-sm"><use href="#i-ext"/></svg></a>
       </p>
     </div>
   </section>
@@ -518,12 +535,12 @@
       <img src="assets/img/logo-cftc-spor.png" alt="CFTC SPOR" width="212" height="208" loading="lazy">
       <p><strong>CFTC SPOR</strong><br>Syndicat national des Personnels des Organismes de Retraite complémentaire</p>
     </div>
-    <p class="footer-meta">© 2026 · CFTC · IRP AUTO · Élections CSE<br><span>Plus forts <em class="script">ensemble</em>&nbsp;!</span></p>
+    <p class="footer-meta">© 2026 · CFTC · IRP AUTO · Élections CSE<br><a href="assets/docs/profession-de-foi-cftc-irp-auto-2026.pdf" target="_blank" rel="noopener">Document complet (PDF, 4 pages)</a><br><span>Plus forts <em class="script">ensemble</em>&nbsp;!</span></p>
   </div>
 </footer>
 
 <a class="to-top" href="#haut" aria-label="Revenir en haut de la page"><svg class="i"><use href="#i-up"/></svg></a>
 
-<script src="assets/js/main.js" defer></script>
+<script src="assets/js/main.js?v=2" defer></script>
 </body>
 </html>

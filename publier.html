@@ -4,14 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>Publier un tract | CFTC IRP AUTO</title>
+  <meta name="referrer" content="no-referrer">
+  <title>Espace équipe | CFTC IRP AUTO</title>
   <meta name="theme-color" content="#17428f">
   <link rel="icon" type="image/png" href="assets/img/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=6">
-  <link rel="stylesheet" href="assets/css/publier.css?v=1">
+  <link rel="stylesheet" href="assets/css/publier.css?v=2">
 </head>
 <body class="admin">
 
@@ -20,12 +21,13 @@
     <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol>
     <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
     <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
-    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
     <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
     <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
-    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
     <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/></symbol>
     <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
   </defs>
@@ -52,37 +54,86 @@
 
     <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
 
-    <!-- ===== Connexion ===== -->
+    <!-- ===== Accès refusé (pas de lien secret valide) ===== -->
+    <section class="panel" id="locked-panel" hidden aria-labelledby="locked-title">
+      <h2 id="locked-title"><span class="panel-ico"><svg class="i"><use href="#i-lock"/></svg></span>Accès réservé</h2>
+      <p id="locked-msg">Cette page est réservée à l'équipe CFTC. Ouvrez-la avec le lien secret qui vous a été transmis.</p>
+    </section>
+
+    <!-- ===== Connexion par mot de passe ===== -->
     <section class="panel" id="login-panel" hidden aria-labelledby="login-title">
       <h2 id="login-title"><span class="panel-ico"><svg class="i"><use href="#i-key"/></svg></span>Connexion</h2>
-      <p>Pour publier, collez votre <strong>clé d'accès GitHub</strong>. Elle n'est envoyée qu'à GitHub et reste enregistrée uniquement sur cet appareil.</p>
+      <p>Entrez le mot de passe de l'équipe.</p>
       <form id="login-form" class="login-form">
+        <input type="text" name="username" value="Espace équipe CFTC" autocomplete="username" hidden>
         <div class="field">
-          <label for="token">Clé d'accès GitHub</label>
-          <input id="token" name="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" required>
+          <label for="password">Mot de passe</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
         </div>
-        <label class="check"><input type="checkbox" id="remember" checked> Se souvenir de moi sur cet appareil</label>
+        <label class="check"><input type="checkbox" id="remember"> Rester connecté sur cet appareil</label>
         <p><button class="btn btn-blue" type="submit" id="login-btn">Se connecter</button></p>
       </form>
+    </section>
 
-      <details class="help">
-        <summary>Comment obtenir ma clé d'accès&nbsp;? <span>(à faire une seule fois)</span></summary>
-        <ol>
-          <li>Connectez-vous à <strong>GitHub</strong> avec le compte qui gère le site, puis ouvrez <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">la page de création de clé <svg class="i i-sm"><use href="#i-ext"/></svg></a>.</li>
-          <li><strong>Token name</strong>&nbsp;: «&nbsp;Tracts CFTC&nbsp;». <strong>Expiration</strong>&nbsp;: choisissez une date après les élections.</li>
-          <li><strong>Repository access</strong>&nbsp;: «&nbsp;Only select repositories&nbsp;», puis choisissez <code>elections-cftc-irpauto</code>.</li>
-          <li><strong>Permissions</strong> → <strong>Repository permissions</strong> → <strong>Contents</strong>&nbsp;: «&nbsp;Read and write&nbsp;».</li>
-          <li>Cliquez sur <strong>Generate token</strong>, copiez la clé (elle commence par <code>github_pat_</code>) et collez-la ci-dessus.</li>
-        </ol>
-        <p class="hint">Ne partagez jamais cette clé&nbsp;: elle permet de modifier le site. En cas de doute, supprimez-la sur GitHub et créez-en une nouvelle.</p>
-      </details>
+    <!-- ===== Configuration de l'accès (administrateur) ===== -->
+    <section class="panel" id="setup-panel" hidden aria-labelledby="setup-title">
+      <h2 id="setup-title"><span class="panel-ico panel-ico-teal"><svg class="i"><use href="#i-link"/></svg></span>Lien secret et mot de passe</h2>
+      <div id="setup-step">
+        <p>Choisissez le mot de passe de l'équipe&nbsp;: la page crée alors un <strong>nouveau lien secret</strong>. Il faudra <strong>le lien et le mot de passe</strong> pour publier. L'ancien lien et l'ancien mot de passe cessent de fonctionner.</p>
+        <form id="setup-form" class="login-form">
+          <input type="text" name="username" value="Espace équipe CFTC" autocomplete="username" hidden>
+          <div class="field" id="setup-token-field">
+            <label for="setup-token">Clé d'accès GitHub</label>
+            <input id="setup-token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+            <p class="hint">Uniquement pour l'administrateur du site. Elle est enregistrée sur le site sous forme chiffrée&nbsp;: personne ne peut la lire sans le lien et le mot de passe.</p>
+          </div>
+          <div class="field">
+            <label for="setup-pass">Nouveau mot de passe de l'équipe</label>
+            <input id="setup-pass" type="password" autocomplete="new-password" minlength="10" required>
+            <p class="hint">10 caractères minimum. Une petite phrase est facile à retenir et difficile à deviner.</p>
+          </div>
+          <div class="field">
+            <label for="setup-pass2">Confirmez le mot de passe</label>
+            <input id="setup-pass2" type="password" autocomplete="new-password" minlength="10" required>
+          </div>
+          <p><button class="btn btn-blue" type="submit" id="setup-btn">Créer le lien secret</button></p>
+        </form>
+
+        <details class="help" id="setup-help">
+          <summary>Comment obtenir la clé d'accès GitHub&nbsp;? <span>(à faire une seule fois)</span></summary>
+          <ol>
+            <li>Connectez-vous à <strong>GitHub</strong> avec le compte qui gère le site, puis ouvrez <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">la page de création de clé <svg class="i i-sm"><use href="#i-ext"/></svg></a>.</li>
+            <li><strong>Token name</strong>&nbsp;: «&nbsp;Tracts CFTC&nbsp;». <strong>Expiration</strong>&nbsp;: choisissez une date après les élections.</li>
+            <li><strong>Repository access</strong>&nbsp;: «&nbsp;Only select repositories&nbsp;», puis choisissez <code>elections-cftc-irpauto</code>.</li>
+            <li><strong>Permissions</strong> → <strong>Repository permissions</strong> → <strong>Contents</strong>&nbsp;: «&nbsp;Read and write&nbsp;».</li>
+            <li>Cliquez sur <strong>Generate token</strong>, copiez la clé (elle commence par <code>github_pat_</code>) et collez-la ci-dessus.</li>
+          </ol>
+        </details>
+      </div>
+
+      <div id="setup-done" hidden>
+        <p><strong>C'est prêt.</strong> Voici le lien secret de l'espace équipe&nbsp;:</p>
+        <div class="secret-link">
+          <input id="secret-link" type="text" readonly aria-label="Lien secret de l'espace équipe">
+          <button type="button" class="btn btn-pink" id="copy-link"><svg class="i i-sm"><use href="#i-copy"/></svg> Copier</button>
+        </div>
+        <ul class="setup-tips">
+          <li>Gardez-le précieusement&nbsp;: il ne sera <strong>plus jamais affiché</strong>. S'il est perdu, refaites cette étape.</li>
+          <li>Transmettez <strong>le lien et le mot de passe séparément</strong> (par exemple le lien par e-mail, le mot de passe de vive voix).</li>
+          <li>Le lien fonctionne tout de suite. Pour changer le mot de passe ou couper l'accès, refaites cette étape&nbsp;: l'ancien lien ne marchera plus.</li>
+        </ul>
+        <p><button type="button" class="btn btn-blue" id="go-app">Ouvrir l'espace de publication</button></p>
+      </div>
     </section>
 
     <!-- ===== Espace de publication ===== -->
     <div id="app" hidden>
       <div class="whoami">
-        <span><svg class="i i-sm"><use href="#i-check"/></svg> Connecté en tant que <strong id="who">…</strong></span>
-        <button type="button" class="link-btn" id="logout">Se déconnecter</button>
+        <span><svg class="i i-sm"><use href="#i-check"/></svg> Connecté à <strong>l'espace équipe</strong></span>
+        <span class="whoami-actions">
+          <button type="button" class="link-btn" id="change-access">Changer le mot de passe</button>
+          <button type="button" class="link-btn" id="logout">Se déconnecter</button>
+        </span>
       </div>
 
       <section class="panel" aria-labelledby="new-title">
@@ -136,6 +187,6 @@
   </div>
 </main>
 
-<script src="assets/js/publier.js?v=1" defer></script>
+<script src="assets/js/publier.js?v=2" defer></script>
 </body>
 </html>

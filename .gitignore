@@ -1,0 +1,6 @@
+# Fichiers sources (non publiés : le site utilise les copies dans assets/)
+/Profession de foi IRP AUTO*.jpg
+/Profession de foi IRP AUTO.pdf
+
+# Configuration locale
+.claude/

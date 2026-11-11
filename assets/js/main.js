@@ -85,6 +85,114 @@
     });
   });
 
+  /* ---------- Nos tracts (liste publiée depuis la page « Publier un tract ») ---------- */
+  var tractsSection = document.getElementById('tracts');
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  var TRACTS_SHOWN = 6;
+
+  function safePath(p) { return typeof p === 'string' && /^tracts\/[A-Za-z0-9._-]+$/.test(p) ? p : null; }
+  function parseDay(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+  function node(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text) n.textContent = text;
+    return n;
+  }
+  function icon(id) {
+    var s = document.createElementNS(SVG_NS, 'svg');
+    s.setAttribute('class', 'i');
+    s.setAttribute('aria-hidden', 'true');
+    var u = document.createElementNS(SVG_NS, 'use');
+    u.setAttribute('href', '#' + id);
+    s.appendChild(u);
+    return s;
+  }
+
+  function tractCard(t) {
+    var file = safePath(t.fichier);
+    var preview = safePath(t.apercu) || (t.type === 'image' ? file : null);
+    var day = parseDay(t.date);
+    var li = node('li', 'tract');
+
+    var cover = node('a', 'tract-cover');
+    cover.href = file; cover.target = '_blank'; cover.rel = 'noopener';
+    cover.setAttribute('aria-label', 'Ouvrir le tract « ' + t.titre + ' »');
+    if (preview) {
+      var img = node('img');
+      img.src = preview; img.alt = ''; img.loading = 'lazy';
+      img.onerror = function () { img.replaceWith(fallback()); };
+      cover.appendChild(img);
+    } else {
+      cover.appendChild(fallback());
+    }
+    if (day && (Date.now() - day.getTime()) < 8 * 24 * 3600 * 1000) cover.appendChild(node('span', 'tract-new', 'Nouveau'));
+    li.appendChild(cover);
+
+    var body = node('div', 'tract-body');
+    if (day) {
+      var d = node('p', 'tract-date');
+      d.appendChild(icon('i-calendar'));
+      d.appendChild(document.createTextNode(day.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })));
+      body.appendChild(d);
+    }
+    body.appendChild(node('h3', '', t.titre));
+    if (t.resume) body.appendChild(node('p', 'tract-resume', t.resume));
+    var actions = node('p', 'tract-actions');
+    var a = node('a', 'btn btn-pink btn-sm', t.type === 'image' ? 'Voir le tract ' : 'Lire le tract ');
+    a.href = file; a.target = '_blank'; a.rel = 'noopener';
+    a.appendChild(icon('i-ext'));
+    actions.appendChild(a);
+    body.appendChild(actions);
+    li.appendChild(body);
+    return li;
+  }
+  function fallback() {
+    var f = node('span', 'tract-fallback');
+    f.appendChild(icon('i-file'));
+    f.appendChild(document.createTextNode('TRACT CFTC'));
+    return f;
+  }
+
+  function renderTracts(list) {
+    list = (list || []).filter(function (t) { return t && t.titre && safePath(t.fichier); });
+    list.sort(function (a, b) {
+      return String(b.date || '').localeCompare(String(a.date || '')) || String(b.publie_le || '').localeCompare(String(a.publie_le || ''));
+    });
+    if (!list.length) return;
+    var ul = document.getElementById('tracts-list');
+    list.forEach(function (t, i) {
+      var li = tractCard(t);
+      if (i >= TRACTS_SHOWN) li.hidden = true;
+      ul.appendChild(li);
+    });
+    tractsSection.hidden = false;
+    var navLink = document.querySelector('.nav-tracts');
+    if (navLink) navLink.hidden = false;
+    // Arrivée par un lien « #tracts » : la rubrique était masquée au chargement,
+    // le navigateur n'a donc pas pu s'y rendre. On le fait maintenant.
+    if (location.hash === '#tracts') {
+      requestAnimationFrame(function () { tractsSection.scrollIntoView({ behavior: 'instant', block: 'start' }); });
+    }
+    if (list.length > TRACTS_SHOWN) {
+      var wrap = document.getElementById('tracts-more-wrap');
+      wrap.hidden = false;
+      document.getElementById('tracts-more').addEventListener('click', function () {
+        ul.querySelectorAll('.tract[hidden]').forEach(function (li) { li.hidden = false; });
+        wrap.hidden = true;
+      });
+    }
+  }
+
+  if (tractsSection && window.fetch) {
+    fetch('tracts/tracts.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) { if (data) renderTracts(data.tracts); })
+      .catch(function () { /* pas de tracts : la rubrique reste masquée */ });
+  }
+
   /* ---------- Compte à rebours du scrutin ---------- */
   var cd = document.getElementById('countdown');
   if (cd) {

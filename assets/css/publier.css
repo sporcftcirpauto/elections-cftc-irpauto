@@ -1,0 +1,110 @@
+/* =========================================================
+   Espace équipe – Publier un tract
+   ========================================================= */
+body.admin { background: var(--bg-soft); }
+.admin .header-inner { justify-content: space-between; }
+.admin-back { margin-left: auto; padding: .65em 1.2em; font-size: .88rem; }
+.admin .brand-text span { display: block !important; }
+
+.admin-main { padding: clamp(32px, 5vw, 56px) 0 80px; }
+.admin-container { max-width: 880px; }
+.admin-head { margin-bottom: 28px; }
+.admin-head h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); color: var(--blue-deep); }
+
+.panel {
+  background: #fff; border: 1px solid var(--line); border-radius: calc(var(--radius) + 2px);
+  box-shadow: var(--shadow-sm); padding: clamp(20px, 4vw, 32px); margin-bottom: 24px;
+}
+.panel h2 { display: flex; align-items: center; gap: 12px; font-size: 1.3rem; color: var(--blue-deep); margin-bottom: 16px; }
+.panel-ico { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: var(--blue-soft); color: var(--blue); flex: none; }
+.panel-ico .i { width: 21px; height: 21px; }
+.panel-ico-pink { background: var(--pink-soft); color: var(--pink-ink); }
+.panel-ico-teal { background: var(--teal-soft); color: var(--teal-ink); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.panel-head h2 { margin-bottom: 0; }
+
+/* Champs */
+.field { margin-bottom: 18px; }
+.field-grid { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 16px; }
+.field label, .field .label { display: block; font-weight: 600; color: var(--ink); margin-bottom: 6px; font-size: .95rem; }
+.req { color: var(--pink-ink); }
+.opt { color: var(--muted); font-weight: 400; font-size: .85rem; }
+.field input[type="text"], .field input[type="password"], .field input[type="date"], .field textarea {
+  width: 100%; font: inherit; font-size: 1rem; color: var(--ink); background: #fff;
+  border: 1.5px solid var(--line); border-radius: 12px; padding: 11px 14px;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.field textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--blue-mid); box-shadow: 0 0 0 4px rgba(38, 105, 178, .15); }
+.field.has-error input, .field.has-error textarea, .field.has-error .dropzone { border-color: var(--pink); }
+.hint { margin: 6px 0 0; font-size: .82rem; color: var(--muted); }
+.check { display: inline-flex; align-items: center; gap: 10px; font-size: .94rem; color: var(--text); margin-bottom: 16px; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--blue); }
+.login-form { max-width: 520px; }
+
+/* Zone de dépôt */
+.dropzone {
+  position: relative; display: block; border: 2px dashed #c7d1e4; border-radius: var(--radius);
+  background: var(--bg-soft); cursor: pointer; transition: border-color .2s ease, background-color .2s ease;
+}
+.dropzone:hover, .dropzone.is-over { border-color: var(--blue-mid); background: var(--blue-soft); }
+.dropzone input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.dropzone:focus-within { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.dz-empty { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 34px 20px; text-align: center; color: var(--muted); font-size: .9rem; }
+.dz-empty .i { width: 38px; height: 38px; color: var(--blue-mid); margin-bottom: 4px; }
+.dz-empty strong { color: var(--ink); font-size: 1rem; }
+.dz-file { display: flex; align-items: center; gap: 18px; padding: 16px; }
+.dz-thumb { display: grid; place-items: center; width: 92px; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; background: #fff; border: 1px solid var(--line); flex: none; box-shadow: var(--shadow-sm); }
+.dz-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.dz-thumb .i { width: 34px; height: 34px; color: var(--blue); }
+.dz-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dz-meta strong { color: var(--ink); overflow-wrap: anywhere; }
+.dz-meta > span { color: var(--muted); font-size: .86rem; }
+.dz-meta .dz-change { color: var(--blue); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; margin-top: 6px; }
+
+.form-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+.btn[disabled] { opacity: .6; cursor: progress; transform: none; }
+
+/* Messages */
+.notice { display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: .95rem; line-height: 1.5; border: 1px solid; }
+.notice .i { width: 22px; height: 22px; flex: none; margin-top: 1px; }
+.notice p { margin: 0; }
+.notice a { font-weight: 700; }
+.notice-info { background: var(--blue-soft); border-color: #c9dbf2; color: var(--blue-deep); }
+.notice-success { background: var(--teal-soft); border-color: #b5e6de; color: #04564e; }
+.notice-error { background: var(--pink-soft); border-color: #f6c3cf; color: #8e1d38; }
+
+.whoami { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 18px; font-size: .92rem; color: var(--muted); }
+.whoami .i { color: var(--teal-ink); }
+.whoami strong { color: var(--ink); }
+.link-btn { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: .9rem; font-weight: 600; color: var(--blue); background: none; border: 0; padding: 6px 4px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.link-btn:hover { color: var(--blue-deep); }
+
+/* Liste des tracts publiés */
+.admin-list { display: grid; gap: 12px; margin-top: 12px; }
+.admin-list .empty { padding: 18px; text-align: center; color: var(--muted); background: var(--bg-soft); border-radius: var(--radius-sm); }
+.admin-item { display: flex; align-items: center; gap: 16px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.admin-item-thumb { display: grid; place-items: center; width: 58px; aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden; background: var(--blue); color: var(--yellow); flex: none; }
+.admin-item-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; background: #fff; }
+.admin-item-thumb .i { width: 26px; height: 26px; }
+.admin-item-txt { flex: 1; min-width: 0; }
+.admin-item-txt strong { display: block; color: var(--ink); overflow-wrap: anywhere; line-height: 1.35; }
+.admin-item-txt span { font-size: .84rem; color: var(--muted); }
+.admin-item-actions { display: flex; align-items: center; gap: 4px; flex: none; }
+.btn-danger { color: var(--pink-ink); }
+.btn-danger:hover { color: #8e1d38; }
+
+.help { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 18px; }
+.help summary { cursor: pointer; font-weight: 700; color: var(--blue); }
+.help summary span { font-weight: 400; color: var(--muted); }
+.help ol { margin: 14px 0 0; padding-left: 22px; list-style: decimal; display: grid; gap: 8px; font-size: .94rem; }
+.help code { background: var(--bg-soft); padding: 1px 6px; border-radius: 6px; font-size: .88em; }
+
+@media (max-width: 600px) {
+  .field-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .admin-back { padding: .6em .9em; font-size: .82rem; }
+  .admin .brand-text span { display: none !important; }
+  .form-actions .btn { width: 100%; }
+  .admin-item { flex-wrap: wrap; }
+  .admin-item-actions { width: 100%; justify-content: flex-end; }
+}

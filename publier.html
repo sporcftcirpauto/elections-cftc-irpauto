@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Publier un tract | CFTC IRP AUTO</title>
+  <meta name="theme-color" content="#17428f">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=5">
+  <link rel="stylesheet" href="assets/css/publier.css?v=1">
+</head>
+<body class="admin">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol>
+    <symbol id="i-ext" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
+  </defs>
+</svg>
+
+<header class="site-header is-scrolled">
+  <div class="container header-inner">
+    <a class="brand" href="./" aria-label="Retour au site CFTC IRP AUTO">
+      <img src="assets/img/logo-cftc-spor.png" alt="" width="212" height="208">
+      <span class="brand-text"><strong>CFTC</strong><span>Espace équipe · Tracts</span></span>
+    </a>
+    <a class="btn btn-blue admin-back" href="./"><svg class="i i-sm"><use href="#i-arrow-left"/></svg> Voir le site</a>
+  </div>
+</header>
+
+<main class="admin-main">
+  <div class="container admin-container">
+
+    <header class="admin-head">
+      <p class="eyebrow">Espace équipe</p>
+      <h1>Publier un tract</h1>
+      <p class="lead">Ajoutez un tract (PDF ou image)&nbsp;: il apparaît automatiquement dans la rubrique «&nbsp;Nos tracts&nbsp;» du site, en général en moins de deux minutes.</p>
+    </header>
+
+    <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
+
+    <!-- ===== Connexion ===== -->
+    <section class="panel" id="login-panel" hidden aria-labelledby="login-title">
+      <h2 id="login-title"><span class="panel-ico"><svg class="i"><use href="#i-key"/></svg></span>Connexion</h2>
+      <p>Pour publier, collez votre <strong>clé d'accès GitHub</strong>. Elle n'est envoyée qu'à GitHub et reste enregistrée uniquement sur cet appareil.</p>
+      <form id="login-form" class="login-form">
+        <div class="field">
+          <label for="token">Clé d'accès GitHub</label>
+          <input id="token" name="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" required>
+        </div>
+        <label class="check"><input type="checkbox" id="remember" checked> Se souvenir de moi sur cet appareil</label>
+        <p><button class="btn btn-blue" type="submit" id="login-btn">Se connecter</button></p>
+      </form>
+
+      <details class="help">
+        <summary>Comment obtenir ma clé d'accès&nbsp;? <span>(à faire une seule fois)</span></summary>
+        <ol>
+          <li>Connectez-vous à <strong>GitHub</strong> avec le compte qui gère le site, puis ouvrez <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">la page de création de clé <svg class="i i-sm"><use href="#i-ext"/></svg></a>.</li>
+          <li><strong>Token name</strong>&nbsp;: «&nbsp;Tracts CFTC&nbsp;». <strong>Expiration</strong>&nbsp;: choisissez une date après les élections.</li>
+          <li><strong>Repository access</strong>&nbsp;: «&nbsp;Only select repositories&nbsp;», puis choisissez <code>elections-cftc-irpauto</code>.</li>
+          <li><strong>Permissions</strong> → <strong>Repository permissions</strong> → <strong>Contents</strong>&nbsp;: «&nbsp;Read and write&nbsp;».</li>
+          <li>Cliquez sur <strong>Generate token</strong>, copiez la clé (elle commence par <code>github_pat_</code>) et collez-la ci-dessus.</li>
+        </ol>
+        <p class="hint">Ne partagez jamais cette clé&nbsp;: elle permet de modifier le site. En cas de doute, supprimez-la sur GitHub et créez-en une nouvelle.</p>
+      </details>
+    </section>
+
+    <!-- ===== Espace de publication ===== -->
+    <div id="app" hidden>
+      <div class="whoami">
+        <span><svg class="i i-sm"><use href="#i-check"/></svg> Connecté en tant que <strong id="who">…</strong></span>
+        <button type="button" class="link-btn" id="logout">Se déconnecter</button>
+      </div>
+
+      <section class="panel" aria-labelledby="new-title">
+        <h2 id="new-title"><span class="panel-ico panel-ico-pink"><svg class="i"><use href="#i-upload"/></svg></span>Nouveau tract</h2>
+        <form id="tract-form" novalidate>
+          <div class="field-grid">
+            <div class="field">
+              <label for="titre">Titre du tract <span class="req">*</span></label>
+              <input id="titre" type="text" maxlength="120" required placeholder="Ex. : NAO 2027 : nos revendications">
+            </div>
+            <div class="field">
+              <label for="date">Date <span class="req">*</span></label>
+              <input id="date" type="date" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="resume">Résumé <span class="opt">(facultatif, 2 ou 3 lignes)</span></label>
+            <textarea id="resume" rows="3" maxlength="300" placeholder="Ce que les salariés doivent retenir de ce tract…"></textarea>
+            <p class="hint"><span id="resume-count">0</span>/300 caractères</p>
+          </div>
+          <div class="field">
+            <span class="label" id="file-label">Fichier du tract <span class="req">*</span></span>
+            <label class="dropzone" id="dropzone">
+              <input id="fichier" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" aria-labelledby="file-label">
+              <span class="dz-empty" id="dz-empty">
+                <svg class="i"><use href="#i-upload"/></svg>
+                <strong>Glissez le fichier ici ou cliquez pour le choisir</strong>
+                <span>PDF, JPG ou PNG · 20&nbsp;Mo maximum</span>
+              </span>
+              <span class="dz-file" id="dz-file" hidden>
+                <span class="dz-thumb"><img id="thumb" alt="Aperçu de la première page" hidden><svg class="i" id="thumb-ico"><use href="#i-file"/></svg></span>
+                <span class="dz-meta"><strong id="file-name"></strong><span id="file-info"></span><span class="dz-change">Changer de fichier</span></span>
+              </span>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-pink" type="submit" id="publish-btn"><svg class="i i-sm"><use href="#i-upload"/></svg> Publier le tract</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="list-title">
+        <div class="panel-head">
+          <h2 id="list-title"><span class="panel-ico panel-ico-teal"><svg class="i"><use href="#i-file"/></svg></span>Tracts publiés</h2>
+          <button type="button" class="link-btn" id="refresh"><svg class="i i-sm"><use href="#i-refresh"/></svg> Actualiser</button>
+        </div>
+        <ul class="admin-list" id="admin-list"></ul>
+      </section>
+    </div>
+
+  </div>
+</main>
+
+<script src="assets/js/publier.js?v=1" defer></script>
+</body>
+</html>

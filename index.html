@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=8">
+  <link rel="stylesheet" href="assets/css/style.css?v=9">
   <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
@@ -68,11 +68,11 @@
       <span class="brand-text"><strong>CSE IRP AUTO</strong><span>Élections 2026 · Liste CFTC</span></span>
     </a>
     <nav class="main-nav" id="menu" aria-label="Navigation principale">
-      <a href="#tracts" class="nav-tracts" hidden>Nos tracts</a>
       <a href="#ambition">Notre ambition</a>
       <a href="#bilan">Notre bilan</a>
       <a href="#engagements">Nos engagements</a>
       <a href="#equipe">Notre équipe</a>
+      <a href="#tracts">Nos tracts</a>
       <a href="#comment-voter">Comment voter&nbsp;?</a>
       <a class="btn btn-pink nav-cta-mobile" href="#vote">Je vote CFTC</a>
     </nav>
@@ -144,6 +144,11 @@
           <span class="quick-txt"><strong>Notre équipe</strong><span>16 candidats de terrain à vos côtés</span></span>
           <svg class="i quick-arrow"><use href="#i-arrow"/></svg>
         </a>
+        <a class="quick-card" href="#tracts" style="--c: var(--teal-ink)">
+          <span class="quick-ico"><svg class="i"><use href="#i-file"/></svg></span>
+          <span class="quick-txt"><strong>Nos tracts</strong><span>L'actualité de la campagne</span></span>
+          <svg class="i quick-arrow"><use href="#i-arrow"/></svg>
+        </a>
         <a class="quick-card" href="#comment-voter" style="--c: var(--blue-mid)">
           <span class="quick-ico"><svg class="i"><use href="#i-ballot"/></svg></span>
           <span class="quick-txt"><strong>Comment voter&nbsp;?</strong><span>Le mode d'emploi du scrutin</span></span>
@@ -159,27 +164,11 @@
           <svg class="i"><use href="#i-list"/></svg>
           <span><strong>Notre liste de candidats</strong><span>Consulter le PDF · 1 page <svg class="i i-sm"><use href="#i-ext"/></svg></span></span>
         </a>
-        <!-- Bouton masqué tant que la vidéo n'est pas en ligne (retirer « hidden » ici et sur la section #video) -->
-        <a class="doc-btn doc-teal" href="#video" id="video-btn" hidden>
+        <a class="doc-btn doc-teal" href="#video" id="video-btn">
           <svg class="i"><use href="#i-play"/></svg>
-          <span><strong>L'essentiel en vidéo</strong><span>Notre campagne en images <svg class="i i-sm"><use href="#i-arrow"/></svg></span></span>
+          <span><strong>L'essentiel en 1'30</strong><span>Regarder la vidéo <svg class="i i-sm"><use href="#i-arrow"/></svg></span></span>
         </a>
       </div>
-    </div>
-  </section>
-
-  <!-- ============ TRACTS (s'affiche dès qu'un tract est publié) ============ -->
-  <section class="section pattern section-tracts" id="tracts" aria-labelledby="tracts-title" hidden>
-    <div class="container">
-      <header class="section-head">
-        <p class="eyebrow">L'actualité de la campagne</p>
-        <h2 id="tracts-title">Nos <span class="u-yellow">tracts</span></h2>
-        <p class="lead">Retrouvez tous les tracts de l'équipe CFTC, du plus récent au plus ancien.</p>
-      </header>
-      <ul class="tracts" id="tracts-list"></ul>
-      <p class="center tracts-more" id="tracts-more-wrap" hidden>
-        <button type="button" class="btn btn-blue" id="tracts-more">Voir tous les tracts</button>
-      </p>
     </div>
   </section>
 
@@ -352,16 +341,20 @@
     </div>
   </section>
 
-  <!-- ============ VIDÉO (masquée tant que la vidéo n'est pas en ligne) ============ -->
-  <section class="section section-blue section-video" id="video" aria-labelledby="video-title" hidden>
+  <!-- ============ VIDÉO ============ -->
+  <section class="section section-blue section-video" id="video" aria-labelledby="video-title">
     <div class="container">
       <header class="section-head center reveal">
-        <p class="eyebrow eyebrow-light">Notre campagne en images</p>
-        <h2 id="video-title">L'essentiel en <span class="y">vidéo</span></h2>
-        <p class="lead">Notre équipe et nos engagements, en quelques minutes.</p>
+        <p class="eyebrow eyebrow-light">Notre campagne en vidéo</p>
+        <h2 id="video-title">L'essentiel en <span class="y">1'30</span></h2>
+        <p class="lead">Nos 4 priorités, notre bilan et notre équipe&nbsp;: toute notre campagne en une minute trente.</p>
       </header>
       <div class="video-frame reveal">
-        <video id="video-player" controls preload="none" playsinline aria-label="L'essentiel de la campagne CFTC en vidéo"></video>
+        <video id="video-player" controls preload="metadata" playsinline width="1920" height="1080"
+               poster="assets/video/lessentiel-cftc.jpg" aria-label="L'essentiel de la campagne CFTC en 1 minute 30">
+          <source src="assets/video/lessentiel-cftc.mp4" type="video/mp4">
+          <p>Votre navigateur ne peut pas lire cette vidéo&nbsp;: <a href="assets/video/lessentiel-cftc.mp4">télécharger la vidéo (MP4, 20&nbsp;Mo)</a>.</p>
+        </video>
       </div>
     </div>
   </section>
@@ -499,8 +492,27 @@
     </div>
   </section>
 
+  <!-- ============ NOS TRACTS (publiés depuis l'espace équipe) ============ -->
+  <section class="section pattern section-tracts" id="tracts" aria-labelledby="tracts-title">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">L'actualité de la campagne</p>
+        <h2 id="tracts-title">Nos <span class="u-yellow">tracts</span></h2>
+        <p class="lead">Retrouvez ici tous les tracts de l'équipe CFTC, du plus récent au plus ancien.</p>
+      </header>
+      <ul class="tracts" id="tracts-list" hidden></ul>
+      <div class="tracts-empty reveal" id="tracts-empty">
+        <span class="tracts-empty-ico"><svg class="i"><use href="#i-file"/></svg></span>
+        <p><strong>Nos tracts arrivent très bientôt</strong>Les tracts de la campagne seront publiés ici très prochainement. Revenez vite&nbsp;!</p>
+      </div>
+      <p class="center tracts-more" id="tracts-more-wrap" hidden>
+        <button type="button" class="btn btn-blue" id="tracts-more">Voir tous les tracts</button>
+      </p>
+    </div>
+  </section>
+
   <!-- ============ COMMENT VOTER ============ -->
-  <section class="section pattern" id="comment-voter" aria-labelledby="voter-title">
+  <section class="section section-soft pattern" id="comment-voter" aria-labelledby="voter-title">
     <div class="container">
       <header class="section-head center reveal">
         <p class="eyebrow">Nos conseils pour le vote</p>
@@ -571,8 +583,8 @@
 <footer class="site-footer">
   <div class="container footer-inner">
     <div class="footer-brand">
-      <img src="assets/img/logo-cftc-spor.png" alt="CFTC SPOR" width="212" height="208" loading="lazy">
-      <p><strong>CFTC SPOR</strong><br>Syndicat national des Personnels des Organismes de Retraite complémentaire</p>
+      <img src="assets/img/logo-cftc-spor.png" alt="SPOR CFTC" width="212" height="208" loading="lazy">
+      <p><strong>SPOR CFTC</strong><br>Syndicat national des Personnels des Organismes de Retraite complémentaire</p>
     </div>
     <p class="footer-meta">© 2026 · CFTC · IRP AUTO · Élections CSE<br><a href="assets/docs/profession-de-foi-cftc-irp-auto-2026.pdf" target="_blank" rel="noopener">Document complet (PDF, 4 pages)</a><br><span>Plus forts <em class="script">ensemble</em>&nbsp;!</span></p>
   </div>
@@ -580,6 +592,6 @@
 
 <a class="to-top" href="#haut" aria-label="Revenir en haut de la page"><svg class="i"><use href="#i-up"/></svg></a>
 
-<script src="assets/js/main.js?v=5" defer></script>
+<script src="assets/js/main.js?v=6" defer></script>
 </body>
 </html>

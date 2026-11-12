@@ -161,6 +161,7 @@
     list.sort(function (a, b) {
       return String(b.date || '').localeCompare(String(a.date || '')) || String(b.publie_le || '').localeCompare(String(a.publie_le || ''));
     });
+    // Aucun tract publié : le message « Nos tracts arrivent très bientôt » reste affiché.
     if (!list.length) return;
     var ul = document.getElementById('tracts-list');
     list.forEach(function (t, i) {
@@ -168,14 +169,8 @@
       if (i >= TRACTS_SHOWN) li.hidden = true;
       ul.appendChild(li);
     });
-    tractsSection.hidden = false;
-    var navLink = document.querySelector('.nav-tracts');
-    if (navLink) navLink.hidden = false;
-    // Arrivée par un lien « #tracts » : la rubrique était masquée au chargement,
-    // le navigateur n'a donc pas pu s'y rendre. On le fait maintenant.
-    if (location.hash === '#tracts') {
-      requestAnimationFrame(function () { tractsSection.scrollIntoView({ behavior: 'instant', block: 'start' }); });
-    }
+    ul.hidden = false;
+    document.getElementById('tracts-empty').hidden = true;
     if (list.length > TRACTS_SHOWN) {
       var wrap = document.getElementById('tracts-more-wrap');
       wrap.hidden = false;
@@ -190,7 +185,20 @@
     fetch('tracts/tracts.json?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) { if (data) renderTracts(data.tracts); })
-      .catch(function () { /* pas de tracts : la rubrique reste masquée */ });
+      .catch(function () { /* liste indisponible : le message d'attente reste affiché */ });
+  }
+
+  /* ---------- « L'essentiel en 1'30 » : le bouton descend jusqu'à la vidéo et la lance ---------- */
+  var videoBtn = document.getElementById('video-btn');
+  var player = document.getElementById('video-player');
+  if (videoBtn && player && player.play) {
+    videoBtn.addEventListener('click', function () {
+      // Lancée pendant le clic, la lecture avec le son est autorisée par les navigateurs.
+      if (player.paused) {
+        var p = player.play();
+        if (p && p.catch) p.catch(function () { /* lecture refusée : la vidéo reste prête, avec ses commandes */ });
+      }
+    });
   }
 
   /* ---------- Compte à rebours du scrutin ---------- */

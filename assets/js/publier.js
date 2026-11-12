@@ -6,7 +6,7 @@
 (function () {
   'use strict';
 
-  var OWNER = 'quent-arch';
+  var OWNER = 'sporcftcirpauto';
   var REPO = 'elections-cftc-irpauto';
   var BRANCH = 'main';
   var DATA_PATH = 'tracts/tracts.json';

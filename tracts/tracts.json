@@ -1,14 +1,3 @@
 {
-  "tracts": [
-    {
-      "id": "2026-11-12-test",
-      "titre": "test",
-      "date": "2026-11-12",
-      "resume": "ljabkhbv",
-      "fichier": "tracts/2026-11-12-test.png",
-      "apercu": "tracts/2026-11-12-test-apercu.jpg",
-      "type": "image",
-      "publie_le": "2026-11-12T09:29:29.974Z"
-    }
-  ]
+  "tracts": []
 }

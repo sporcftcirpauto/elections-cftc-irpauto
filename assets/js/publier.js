@@ -1,6 +1,6 @@
 /* Espace équipe – publication des tracts sur le dépôt GitHub du site.
-   Accès : lien secret (#cle=…) + mot de passe de l'équipe, qui déchiffrent la clé
-   GitHub enregistrée dans tracts/acces.json. Configuration : publier.html#config.
+   Accès : bouton cadenas en haut à droite du site, puis mot de passe de l'équipe, qui
+   déchiffre la clé GitHub enregistrée dans tracts/acces.json. Configuration : publier.html#config.
    Chaque publication ajoute le fichier (et son aperçu) dans tracts/ et met à jour
    tracts/tracts.json en un seul commit ; GitHub Pages republie le site ensuite. */
 (function () {
@@ -30,17 +30,28 @@
   function $(id) { return document.getElementById(id); }
 
   /* ---------- Stockage de la clé (sur cet appareil uniquement) ---------- */
-  function readToken() {
-    try { return localStorage.getItem(STORE_KEY) || sessionStorage.getItem(STORE_KEY); } catch (e) { return null; }
-  }
-  function saveToken(t, remember) {
+  // La session est liée à la version du mot de passe : après un changement de mot de passe,
+  // les appareils restés connectés doivent se reconnecter.
+  function readToken(version) {
     try {
-      localStorage.removeItem(STORE_KEY); sessionStorage.removeItem(STORE_KEY);
-      (remember ? localStorage : sessionStorage).setItem(STORE_KEY, t);
+      var store = localStorage.getItem(STORE_KEY) ? localStorage : sessionStorage;
+      var t = store.getItem(STORE_KEY);
+      if (t && version && store.getItem(STORE_KEY + '-v') !== version) { clearToken(); return null; }
+      return t;
+    } catch (e) { return null; }
+  }
+  function saveToken(t, remember, version) {
+    try {
+      clearToken();
+      var store = remember ? localStorage : sessionStorage;
+      store.setItem(STORE_KEY, t);
+      if (version) store.setItem(STORE_KEY + '-v', version);
     } catch (e) { /* stockage indisponible : la clé reste en mémoire pour cette visite */ }
   }
   function clearToken() {
-    try { localStorage.removeItem(STORE_KEY); sessionStorage.removeItem(STORE_KEY); } catch (e) {}
+    try {
+      [localStorage, sessionStorage].forEach(function (s) { s.removeItem(STORE_KEY); s.removeItem(STORE_KEY + '-v'); });
+    } catch (e) {}
   }
 
   /* ---------- Messages ---------- */
@@ -470,11 +481,10 @@
 
   $('refresh').addEventListener('click', loadList);
 
-  /* ---------- Chiffrement de la clé GitHub (lien secret + mot de passe) ----------
-     La clé GitHub est enregistrée sur le site chiffrée (AES-GCM). La clé de
-     chiffrement est dérivée (PBKDF2) du secret contenu dans le lien ET du mot de
-     passe : sans les deux, le fichier tracts/acces.json est illisible. Le secret
-     du lien n'est jamais envoyé à un serveur (il est après le « # » de l'adresse). */
+  /* ---------- Chiffrement de la clé GitHub par le mot de passe de l'équipe ----------
+     La clé GitHub est enregistrée sur le site chiffrée (AES-GCM) dans tracts/acces.json.
+     La clé de chiffrement est dérivée du mot de passe (PBKDF2-SHA256, 600 000 itérations) :
+     sans le mot de passe, le fichier est illisible. */
   var enc = new TextEncoder();
   function rand(n) { var a = new Uint8Array(n); crypto.getRandomValues(a); return a; }
   function b64(bytes) {
@@ -487,14 +497,9 @@
     for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i);
     return a;
   }
-  function b64url(bytes) { return b64(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
-  function hex(buf) {
-    return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
-  }
-  function linkId(secret) { return crypto.subtle.digest('SHA-256', enc.encode('cftc-lien:' + secret)).then(hex); }
   function cleanPassword(p) { return String(p || '').normalize('NFC'); }
-  function deriveKey(secret, password, salt, iterations) {
-    return crypto.subtle.importKey('raw', enc.encode(secret + '\n' + cleanPassword(password)), 'PBKDF2', false, ['deriveKey'])
+  function deriveKey(password, salt, iterations) {
+    return crypto.subtle.importKey('raw', enc.encode('cftc-tracts:' + cleanPassword(password)), 'PBKDF2', false, ['deriveKey'])
       .then(function (base) {
         return crypto.subtle.deriveKey(
           { name: 'PBKDF2', salt: salt, iterations: iterations, hash: 'SHA-256' },
@@ -502,22 +507,18 @@
       });
   }
   function sealToken(tok, password) {
-    var secret = b64url(rand(32)), salt = rand(16), iv = rand(12);
-    return Promise.all([deriveKey(secret, password, salt, ITERATIONS), linkId(secret)]).then(function (r) {
-      return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, r[0], enc.encode(JSON.stringify({ token: tok })))
-        .then(function (ct) {
-          return {
-            secret: secret,
-            access: {
-              v: 1, lien: r[1], kdf: 'PBKDF2-SHA256', iterations: ITERATIONS,
-              sel: b64(salt), iv: b64(iv), donnees: b64(new Uint8Array(ct)), cree_le: new Date().toISOString()
-            }
-          };
-        });
-    });
+    var salt = rand(16), iv = rand(12);
+    return deriveKey(password, salt, ITERATIONS)
+      .then(function (key) { return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, enc.encode(JSON.stringify({ token: tok }))); })
+      .then(function (ct) {
+        return {
+          v: 2, kdf: 'PBKDF2-SHA256', iterations: ITERATIONS,
+          sel: b64(salt), iv: b64(iv), donnees: b64(new Uint8Array(ct)), cree_le: new Date().toISOString()
+        };
+      });
   }
-  function openToken(acc, secret, password) {
-    return deriveKey(secret, password, unb64(acc.sel), acc.iterations || ITERATIONS)
+  function openToken(acc, password) {
+    return deriveKey(password, unb64(acc.sel), acc.iterations || ITERATIONS)
       .then(function (key) { return crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(acc.iv) }, key, unb64(acc.donnees)); })
       .then(function (plain) {
         var d = JSON.parse(new TextDecoder().decode(plain));
@@ -526,8 +527,8 @@
       });
   }
 
-  // Lit la configuration d'accès : d'abord la version publiée du site, puis,
-  // si elle ne correspond pas au lien (changement tout récent), la dernière version sur GitHub.
+  // Configuration d'accès : la dernière version sur GitHub (un changement de mot de passe
+  // compte tout de suite) ; si GitHub ne répond pas, celle publiée sur le site.
   function fetchJson(url, headers) {
     return fetch(url, { headers: headers || {}, cache: 'no-store' }).then(function (r) {
       if (r.status === 404) return null;
@@ -535,42 +536,24 @@
       return r.json();
     });
   }
-  function loadAccess(secret) {
-    return linkId(secret).then(function (id) {
-      var siteErr = null;
-      return fetchJson(ACCESS_PATH + '?t=' + Date.now())
-        .catch(function (e) { siteErr = e; return null; })
-        .then(function (a) {
-          if (a && a.lien === id) return { state: 'ok', access: a };
-          return fetchJson(API + REPO_PATH + '/contents/' + ACCESS_PATH + '?ref=' + BRANCH, { 'Accept': 'application/vnd.github.raw+json' })
-            .then(function (b) {
-              if (b && b.lien === id) return { state: 'ok', access: b };
-              return { state: (a || b) ? 'perime' : 'absent' };
-            }, function (e) {
-              if (a) return { state: 'perime' };
-              if (siteErr) throw e;
-              return { state: 'absent' };
-            });
-        });
-    });
+  function loadAccess() {
+    return fetchJson(API + REPO_PATH + '/contents/' + ACCESS_PATH + '?ref=' + BRANCH, { 'Accept': 'application/vnd.github.raw+json' })
+      .catch(function () { return fetchJson(ACCESS_PATH + '?t=' + Date.now()); })
+      .then(function (a) { return a && a.v === 2 && a.sel && a.iv && a.donnees ? a : null; });
   }
 
-  /* ---------- Écrans : accès refusé, connexion, configuration, publication ---------- */
-  var linkSecret = null;
+  /* ---------- Écrans : connexion, configuration, publication ---------- */
   var access = null;
-  var newLink = null;
   var PANELS = ['locked-panel', 'login-panel', 'setup-panel', 'app'];
   function show(id) { PANELS.forEach(function (p) { $(p).hidden = p !== id; }); }
 
   var LOCKED = {
-    nolink: 'Cette page est réservée à l\'équipe CFTC. Ouvrez-la avec le lien secret qui vous a été transmis.',
-    perime: 'Ce lien n\'est plus valable : l\'accès a été modifié. Demandez le nouveau lien à l\'administrateur du site.',
-    absent: 'L\'espace équipe n\'est pas encore activé : l\'administrateur du site doit d\'abord créer le lien secret et le mot de passe.',
-    reseau: 'Impossible de vérifier le lien pour le moment. Vérifiez votre connexion internet puis rechargez la page.',
+    absent: 'L\'espace équipe n\'est pas encore activé : l\'administrateur du site doit d\'abord choisir le mot de passe.',
+    reseau: 'Impossible de charger l\'espace équipe pour le moment. Vérifiez votre connexion internet puis rechargez la page.',
     navigateur: 'Ce navigateur est trop ancien pour l\'espace équipe. Utilisez une version récente de Chrome, Edge, Firefox ou Safari.'
   };
   function showLocked(kind) {
-    $('locked-msg').textContent = LOCKED[kind] || LOCKED.nolink;
+    $('locked-msg').textContent = LOCKED[kind] || LOCKED.absent;
     show('locked-panel');
   }
   function showLogin() {
@@ -596,7 +579,7 @@
   function logout() {
     token = null;
     clearToken();
-    if (linkSecret && access) showLogin(); else route();
+    if (access) showLogin(); else route();
   }
   function check() {
     return api(REPO_PATH).then(function (repo) {
@@ -608,21 +591,17 @@
   function route() {
     clearInterval(watchTimer);
     clearNotice();
-    linkSecret = null; access = null;
+    access = null;
     if (!window.crypto || !crypto.subtle || !window.TextEncoder) { showLocked('navigateur'); return; }
-    var h = location.hash;
-    if (h === '#config') { showSetup(); return; }
-    var m = /^#cle=([A-Za-z0-9_-]{30,})$/.exec(h);
-    if (!m) { showLocked('nolink'); return; }
-    var secret = m[1];
+    if (location.hash === '#config') { showSetup(); return; }
     show(null);
-    notify('info', 'Vérification du lien…');
-    loadAccess(secret).then(function (r) {
-      if (location.hash !== h) return;
+    notify('info', 'Chargement…');
+    loadAccess().then(function (a) {
+      if (location.hash === '#config') return;
       clearNotice();
-      if (r.state !== 'ok') { token = null; clearToken(); showLocked(r.state); return; }
-      linkSecret = secret; access = r.access;
-      token = token || readToken();
+      if (!a) { token = null; clearToken(); showLocked('absent'); return; }
+      access = a;
+      token = token || readToken(a.cree_le);
       if (!token) { showLogin(); return; }
       return check().then(showApp, function (err) {
         token = null; clearToken();
@@ -630,7 +609,7 @@
         if (err && err.status === 401) notify('error', explain(err));
       });
     }).catch(function () {
-      if (location.hash !== h) return;
+      if (location.hash === '#config') return;
       clearNotice();
       showLocked('reseau');
     });
@@ -641,14 +620,14 @@
     e.preventDefault();
     var pass = $('password').value;
     if (!pass) { notify('error', 'Entrez le mot de passe.'); return; }
-    if (!access || !linkSecret) { route(); return; }
+    if (!access) { route(); return; }
     var btn = $('login-btn');
     btn.disabled = true;
     notify('info', 'Vérification du mot de passe…');
-    openToken(access, linkSecret, pass).then(function (tok) {
+    openToken(access, pass).then(function (tok) {
       token = tok;
       return check().then(function () {
-        saveToken(tok, $('remember').checked);
+        saveToken(tok, $('remember').checked, access.cree_le);
         $('password').value = '';
         clearNotice();
         showApp();
@@ -662,14 +641,14 @@
     }).then(function () { btn.disabled = false; });
   });
 
-  /* Configuration : création du lien secret et du mot de passe */
+  /* Configuration : choix du mot de passe de l'équipe */
   $('setup-form').addEventListener('submit', function (e) {
     e.preventDefault();
     var known = token || readToken();
     var tok = known || $('setup-token').value.trim();
     var p1 = $('setup-pass').value, p2 = $('setup-pass2').value;
     if (!tok) { notify('error', 'Collez la clé d\'accès GitHub.'); return; }
-    if (cleanPassword(p1).length < 10) { notify('error', 'Le mot de passe doit contenir au moins 10 caractères.'); return; }
+    if (cleanPassword(p1).length < 12) { notify('error', 'Le mot de passe doit contenir au moins 12 caractères.'); return; }
     if (p1 !== p2) { notify('error', 'Les deux mots de passe ne sont pas identiques.'); return; }
     var btn = $('setup-btn');
     btn.disabled = true;
@@ -677,43 +656,35 @@
     var sealed;
     notify('info', 'Vérification de la clé GitHub…');
     check().then(function () {
-      notify('info', 'Création du lien secret…');
+      notify('info', 'Enregistrement du mot de passe…');
       return sealToken(tok, p1);
     }).then(function (s) {
       sealed = s;
       return commit(function () {
         return {
-          entries: [{ path: ACCESS_PATH, mode: '100644', type: 'blob', content: JSON.stringify(s.access, null, 2) + '\n' }],
-          message: 'Espace équipe : nouveau lien secret et mot de passe'
+          entries: [{ path: ACCESS_PATH, mode: '100644', type: 'blob', content: JSON.stringify(s, null, 2) + '\n' }],
+          message: 'Espace équipe : nouveau mot de passe'
         };
       });
     }).then(function () {
-      saveToken(tok, false);
-      newLink = location.origin + location.pathname + location.search + '#cle=' + sealed.secret;
-      $('secret-link').value = newLink;
+      access = sealed;
+      saveToken(tok, false, sealed.cree_le);
       $('setup-token').value = '';
       $('setup-pass').value = '';
       $('setup-pass2').value = '';
       $('setup-step').hidden = true;
       $('setup-done').hidden = false;
-      notify('success', 'Le lien secret et le mot de passe sont enregistrés.');
+      notify('success', 'Le mot de passe de l\'équipe est enregistré.');
     }).catch(function (err) {
       token = null;
       if (known && err && err.status === 401) { clearToken(); showSetup(); }
-      notify('error', 'L\'accès n\'a pas été enregistré. ' + explain(err));
+      notify('error', 'Le mot de passe n\'a pas été enregistré. ' + explain(err));
     }).then(function () { btn.disabled = false; });
   });
 
-  $('copy-link').addEventListener('click', function () {
-    var input = $('secret-link');
-    input.select();
-    function done() { notify('success', 'Lien copié. Transmettez-le avec le mot de passe, mais séparément.'); }
-    function legacy() { try { document.execCommand('copy'); done(); } catch (e) { notify('info', 'Sélectionnez le lien et copiez-le (Ctrl + C).'); } }
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(input.value).then(done, legacy);
-    else legacy();
-  });
   $('go-app').addEventListener('click', function () {
-    if (newLink) location.hash = newLink.split('#')[1];
+    history.replaceState(null, '', location.pathname + location.search);
+    route();
   });
   $('change-access').addEventListener('click', function () { location.hash = 'config'; });
   $('logout').addEventListener('click', function () { logout(); clearNotice(); });

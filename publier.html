@@ -11,8 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=7">
-  <link rel="stylesheet" href="assets/css/publier.css?v=2">
+  <link rel="stylesheet" href="assets/css/style.css?v=8">
+  <link rel="stylesheet" href="assets/css/publier.css?v=3">
 </head>
 <body class="admin">
 
@@ -54,10 +54,10 @@
 
     <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
 
-    <!-- ===== Accès refusé (pas de lien secret valide) ===== -->
+    <!-- ===== Espace pas encore activé / indisponible ===== -->
     <section class="panel" id="locked-panel" hidden aria-labelledby="locked-title">
-      <h2 id="locked-title"><span class="panel-ico"><svg class="i"><use href="#i-lock"/></svg></span>Accès réservé</h2>
-      <p id="locked-msg">Cette page est réservée à l'équipe CFTC. Ouvrez-la avec le lien secret qui vous a été transmis.</p>
+      <h2 id="locked-title"><span class="panel-ico"><svg class="i"><use href="#i-lock"/></svg></span>Espace équipe</h2>
+      <p id="locked-msg">L'espace équipe n'est pas encore activé.</p>
     </section>
 
     <!-- ===== Connexion par mot de passe ===== -->
@@ -77,26 +77,26 @@
 
     <!-- ===== Configuration de l'accès (administrateur) ===== -->
     <section class="panel" id="setup-panel" hidden aria-labelledby="setup-title">
-      <h2 id="setup-title"><span class="panel-ico panel-ico-teal"><svg class="i"><use href="#i-link"/></svg></span>Lien secret et mot de passe</h2>
+      <h2 id="setup-title"><span class="panel-ico panel-ico-teal"><svg class="i"><use href="#i-key"/></svg></span>Mot de passe de l'équipe</h2>
       <div id="setup-step">
-        <p>Choisissez le mot de passe de l'équipe&nbsp;: la page crée alors un <strong>nouveau lien secret</strong>. Il faudra <strong>le lien et le mot de passe</strong> pour publier. L'ancien lien et l'ancien mot de passe cessent de fonctionner.</p>
+        <p>Choisissez le mot de passe qui permettra de publier les tracts. Il remplace immédiatement l'ancien mot de passe.</p>
         <form id="setup-form" class="login-form">
           <input type="text" name="username" value="Espace équipe CFTC" autocomplete="username" hidden>
           <div class="field" id="setup-token-field">
             <label for="setup-token">Clé d'accès GitHub</label>
             <input id="setup-token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
-            <p class="hint">Uniquement pour l'administrateur du site. Elle est enregistrée sur le site sous forme chiffrée&nbsp;: personne ne peut la lire sans le lien et le mot de passe.</p>
+            <p class="hint">Uniquement pour l'administrateur du site. Elle est enregistrée sur le site chiffrée avec le mot de passe&nbsp;: sans le mot de passe, personne ne peut la lire.</p>
           </div>
           <div class="field">
             <label for="setup-pass">Nouveau mot de passe de l'équipe</label>
-            <input id="setup-pass" type="password" autocomplete="new-password" minlength="10" required>
-            <p class="hint">10 caractères minimum. Une petite phrase est facile à retenir et difficile à deviner.</p>
+            <input id="setup-pass" type="password" autocomplete="new-password" minlength="12" required>
+            <p class="hint">12 caractères minimum. C'est la seule protection de l'espace&nbsp;: prenez une phrase d'au moins 4 mots, facile à retenir mais impossible à deviner (pas de nom, de date ou de «&nbsp;cftc2026&nbsp;»).</p>
           </div>
           <div class="field">
             <label for="setup-pass2">Confirmez le mot de passe</label>
-            <input id="setup-pass2" type="password" autocomplete="new-password" minlength="10" required>
+            <input id="setup-pass2" type="password" autocomplete="new-password" minlength="12" required>
           </div>
-          <p><button class="btn btn-blue" type="submit" id="setup-btn">Créer le lien secret</button></p>
+          <p><button class="btn btn-blue" type="submit" id="setup-btn">Enregistrer le mot de passe</button></p>
         </form>
 
         <details class="help" id="setup-help">
@@ -112,15 +112,12 @@
       </div>
 
       <div id="setup-done" hidden>
-        <p><strong>C'est prêt.</strong> Voici le lien secret de l'espace équipe&nbsp;:</p>
-        <div class="secret-link">
-          <input id="secret-link" type="text" readonly aria-label="Lien secret de l'espace équipe">
-          <button type="button" class="btn btn-pink" id="copy-link"><svg class="i i-sm"><use href="#i-copy"/></svg> Copier</button>
-        </div>
+        <p><strong>C'est prêt.</strong> Le nouveau mot de passe est actif.</p>
         <ul class="setup-tips">
-          <li>Gardez-le précieusement&nbsp;: il ne sera <strong>plus jamais affiché</strong>. S'il est perdu, refaites cette étape.</li>
-          <li>Transmettez <strong>le lien et le mot de passe séparément</strong> (par exemple le lien par e-mail, le mot de passe de vive voix).</li>
-          <li>Le lien fonctionne tout de suite. Pour changer le mot de passe ou couper l'accès, refaites cette étape&nbsp;: l'ancien lien ne marchera plus.</li>
+          <li>Pour publier&nbsp;: sur le site, cliquez sur le petit <strong>cadenas en haut à droite</strong>, puis entrez le mot de passe.</li>
+          <li>Ne donnez le mot de passe qu'aux personnes qui publient les tracts, de vive voix de préférence.</li>
+          <li>Pour le changer&nbsp;: «&nbsp;Changer le mot de passe&nbsp;» dans l'espace équipe. Tous les appareils devront se reconnecter avec le nouveau.</li>
+          <li>Pour retirer l'accès à quelqu'un qui connaissait l'ancien mot de passe, remplacez aussi la clé GitHub (supprimez-la sur GitHub, créez-en une nouvelle) avant de choisir le nouveau mot de passe.</li>
         </ul>
         <p><button type="button" class="btn btn-blue" id="go-app">Ouvrir l'espace de publication</button></p>
       </div>
@@ -187,6 +184,6 @@
   </div>
 </main>
 
-<script src="assets/js/publier.js?v=2" defer></script>
+<script src="assets/js/publier.js?v=3" defer></script>
 </body>
 </html>

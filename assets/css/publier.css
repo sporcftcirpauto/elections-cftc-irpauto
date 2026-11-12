@@ -96,13 +96,6 @@ body.admin { background: var(--bg-soft); }
 
 .whoami-actions { display: inline-flex; flex-wrap: wrap; gap: 4px 14px; }
 
-/* Lien secret */
-.secret-link { display: flex; gap: 10px; margin: 6px 0 16px; }
-.secret-link input {
-  flex: 1; min-width: 0; font: inherit; font-size: .9rem; color: var(--ink); background: var(--bg-soft);
-  border: 1.5px solid var(--line); border-radius: 12px; padding: 11px 14px;
-}
-.secret-link .btn { flex: none; }
 .setup-tips { margin: 0 0 20px; padding-left: 20px; list-style: disc; display: grid; gap: 6px; font-size: .94rem; }
 
 .help { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 18px; }
@@ -118,5 +111,4 @@ body.admin { background: var(--bg-soft); }
   .form-actions .btn { width: 100%; }
   .admin-item { flex-wrap: wrap; }
   .admin-item-actions { width: 100%; justify-content: flex-end; }
-  .secret-link { flex-direction: column; }
 }

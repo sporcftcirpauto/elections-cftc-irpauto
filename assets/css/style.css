@@ -140,11 +140,23 @@ strong, b { font-weight: 700; }
 .burger { display: none; margin-left: auto; width: 44px; height: 44px; border: 0; border-radius: 12px; background: var(--bg-soft); color: var(--blue); cursor: pointer; align-items: center; justify-content: center; }
 .burger .i { width: 24px; height: 24px; }
 
+/* Bouton discret de connexion à l'espace équipe (tracts) */
+.header-login {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line);
+  color: var(--muted); text-decoration: none;
+  transition: color .2s ease, background-color .2s ease, border-color .2s ease;
+}
+.header-login .i { width: 16px; height: 16px; }
+.header-login:hover { color: var(--blue); background: var(--bg-soft); border-color: #c9d6ec; }
+
 /* Menu en ligne (6 liens) : format compact pour tenir dans la largeur du conteneur */
 @media (min-width: 1200px) {
-  .header-inner { gap: 20px; }
+  .header-inner { gap: 16px; }
+  .brand-text strong { font-size: 1.12rem; }
   .brand-text span { display: none; }
-  .main-nav a:not(.btn) { padding: 8px 8px; font-size: .86rem; }
+  .main-nav a:not(.btn) { padding: 8px 7px; font-size: .86rem; }
+  .header-login { margin-left: -4px; }
 }
 /* Menu « burger » dès que les 6 liens ne tiennent plus sur une ligne */
 @media (max-width: 1199px) {
@@ -166,7 +178,7 @@ strong, b { font-weight: 700; }
   :root { --header-h: 66px; }
   .brand img { width: 46px; }
   .header-cta { display: none; }
-  .burger { margin-left: auto; }
+  .header-login { margin-left: auto; }
   .nav-cta-mobile { display: inline-flex; margin-top: 10px; }
 }
 

@@ -155,7 +155,8 @@ strong, b { font-weight: 700; }
   .header-inner { gap: 16px; }
   .brand-text strong { font-size: 1.12rem; }
   .brand-text span { display: none; }
-  .main-nav a:not(.btn) { padding: 8px 7px; font-size: .86rem; }
+  .main-nav a:not(.btn) { padding: 8px 6px; font-size: .86rem; }
+  .header-cta { padding: .68em 1.05em; font-size: .88rem; }  /* « Entrez dans l'histoire » */
   .header-login { margin-left: -4px; }
 }
 /* Menu « burger » dès que les 6 liens ne tiennent plus sur une ligne */
@@ -180,6 +181,14 @@ strong, b { font-weight: 700; }
   .header-cta { display: none; }
   .header-login { margin-left: auto; }
   .nav-cta-mobile { display: inline-flex; margin-top: 10px; }
+}
+/* Très petits téléphones (320–370 px) : logo, cadenas et menu tiennent sur la ligne */
+@media (max-width: 374px) {
+  .header-inner { gap: 12px; }
+  .brand { gap: 8px; }
+  .brand img { width: 38px; }
+  .brand-text strong { font-size: 1.08rem; }
+  .brand-text span { font-size: .66rem; }
 }
 
 /* =========================================================

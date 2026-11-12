@@ -77,10 +77,11 @@
       <a href="#tracts">Nos tracts</a>
       <a href="#comment-voter">Comment voter&nbsp;?</a>
       <a class="btn btn-pink nav-cta-mobile" href="#vote">Entrez dans l'histoire</a>
-      <a class="btn btn-teal nav-cta-mobile" href="#questions">Vos questions</a>
+      <!-- « Vos questions » masqué en attendant que la boîte pro reçoive les messages du formulaire : retirer « hidden » (3 endroits) pour le remettre -->
+      <a class="btn btn-teal nav-cta-mobile" href="#questions" hidden>Vos questions</a>
     </nav>
     <a class="btn btn-pink header-cta" href="#vote">Entrez dans l'histoire</a>
-    <a class="btn btn-teal header-cta header-cta-q" href="#questions">Vos questions</a>
+    <a class="btn btn-teal header-cta header-cta-q" href="#questions" hidden>Vos questions</a>
     <a class="header-login" href="publier.html" rel="nofollow" title="Connexion (équipe)" aria-label="Connexion à l'espace équipe">
       <svg class="i"><use href="#i-lock"/></svg>
     </a>
@@ -584,7 +585,7 @@
   </section>
 
   <!-- ============ VOS QUESTIONS (formulaire envoyé à syndicat.cftc@irpauto.fr) ============ -->
-  <section class="section pattern section-questions" id="questions" aria-labelledby="questions-title">
+  <section class="section pattern section-questions" id="questions" aria-labelledby="questions-title" hidden>
     <div class="container">
       <header class="section-head center reveal">
         <p class="eyebrow">Vos questions</p>

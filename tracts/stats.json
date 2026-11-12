@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "service": "goatcounter",
+  "code": "sporcftcirpauto",
+  "kdf": "HKDF-SHA256",
+  "sel": "zvk9bjANQGAidMUaVbs3eQ==",
+  "iv": "tosmOEDRQeJLucvZ",
+  "donnees": "F+B1ZXj8i3SAEqLdyAKCKd9a65uAQJreGXRKTaDDaSj3XMIfK0JU0bPZTImK4TA+hdGL4oG+9zwjiTDFZxtKPw/T2hfsXe/fuI94aYc=",
+  "cree_le": "2026-11-12T21:15:55.071Z"
+}

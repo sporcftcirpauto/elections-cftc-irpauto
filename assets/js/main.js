@@ -201,23 +201,272 @@
     });
   }
 
-  /* ---------- Compte à rebours du scrutin ---------- */
-  var cd = document.getElementById('countdown');
-  if (cd) {
-    var start = new Date(2026, 10, 23, 0, 0, 0);  // 23 novembre 2026
-    var end = new Date(2026, 10, 26, 0, 0, 0);    // fin du 25 novembre 2026
-    var now = new Date();
-    var day = 24 * 60 * 60 * 1000;
-    if (now < start) {
-      var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      var d = Math.round((start - today) / day);
-      cd.innerHTML = d <= 1
-        ? 'Ouverture du vote <b>demain</b>&nbsp;!'
-        : 'Ouverture du vote dans <b>' + d + '&nbsp;jours</b>';
-      cd.hidden = false;
-    } else if (now < end) {
-      cd.innerHTML = '<b>Le vote est ouvert</b> jusqu\'au 25 novembre&nbsp;!';
-      cd.hidden = false;
+  var LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+
+  /* ---------- Mesure d'audience (GoatCounter : anonyme, sans cookie) ----------
+     Chaque événement est compté une fois par visiteur. Les noms ci-dessous sont repris
+     tels quels par le tableau de bord de l'espace équipe (assets/js/stats.js). */
+  var gcQueue = [];
+  function track(path, title) {
+    var gc = window.goatcounter;
+    if (gc && typeof gc.count === 'function') {
+      try { gc.count({ path: path, title: title, event: true }); } catch (e) { /* mesure indisponible */ }
+    } else if (gcQueue.length < 60) {
+      gcQueue.push([path, title]);  // count.js se charge en différé : on attend qu'il soit prêt
     }
+  }
+  var gcTries = 0;
+  var gcWait = setInterval(function () {
+    var gc = window.goatcounter;
+    if (gc && typeof gc.count === 'function') {
+      clearInterval(gcWait);
+      gcQueue.splice(0).forEach(function (e) { track(e[0], e[1]); });
+    } else if (++gcTries > 60) {
+      clearInterval(gcWait);  // bloqué (bloqueur de publicité…) : on abandonne
+      gcQueue = [];
+    }
+  }, 500);
+  function slug(s) {
+    return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+  }
+
+  // Clics sur les documents, les tracts et les boutons principaux
+  var DOCS = {
+    'cftc-profession-de-foi': 'Profession de foi',
+    'cftc-liste-candidats': 'Liste des candidats',
+    'cftc-nos-engagements': 'Nos engagements',
+    'cftc-notre-ambition': 'Notre ambition',
+    'cftc-notre-bilan': 'Notre bilan',
+    'profession-de-foi-cftc-irp-auto-2026': 'Document complet (4 pages)'
+  };
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[href]') : null;
+    if (!a) return;
+    var href = a.getAttribute('href');
+    var tract = a.closest('.tract');
+    if (tract) {
+      var file = href.split('/').pop().replace(/\.[a-z0-9]+$/i, '');
+      var h = tract.querySelector('h3');
+      track('tract-' + slug(file), 'Tract : ' + (h ? h.textContent : file));
+      return;
+    }
+    var pdf = /([^\/?#]+)\.pdf(?:[?#].*)?$/i.exec(href);
+    if (pdf) { track('pdf-' + slug(pdf[1]), 'PDF : ' + (DOCS[pdf[1]] || pdf[1])); return; }
+    if (a.id === 'video-btn') track('bouton-video', 'Bouton « L\'essentiel en 1\'30 »');
+    else if (href === '#vote' && a.classList.contains('btn')) track('bouton-entrez-dans-l-histoire', 'Bouton « Entrez dans l\'histoire »');
+    else if (href === '#questions' && a.classList.contains('btn')) track('bouton-vos-questions', 'Bouton « Vos questions »');
+  });
+
+  // Vidéo : lancée, regardée à moitié, regardée jusqu'au bout
+  if (player) {
+    var vSeen = {};
+    var vOnce = function (k, path, title) { if (!vSeen[k]) { vSeen[k] = true; track(path, title); } };
+    player.addEventListener('play', function () { vOnce('play', 'video-lancee', 'Vidéo : lancée'); });
+    player.addEventListener('timeupdate', function () {
+      if (player.duration && player.currentTime >= player.duration / 2) vOnce('half', 'video-moitie', 'Vidéo : regardée à moitié');
+    });
+    player.addEventListener('ended', function () { vOnce('end', 'video-terminee', 'Vidéo : regardée jusqu\'au bout'); });
+  }
+
+  // Parties du site lues : la section reste au milieu de l'écran pendant au moins 2 secondes
+  var SECTIONS = {
+    ambition: 'Notre ambition', bilan: 'Notre bilan', engagements: 'Nos engagements', video: 'Vidéo',
+    equipe: 'Notre équipe', tracts: 'Nos tracts', 'comment-voter': 'Comment voter ?',
+    questions: 'Vos questions', vote: 'Jouons collectif (bas de page)'
+  };
+  if ('IntersectionObserver' in window) {
+    var secTimers = {};
+    var secObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var id = en.target.id;
+        clearTimeout(secTimers[id]);
+        if (en.isIntersecting) {
+          secTimers[id] = setTimeout(function () {
+            secObs.unobserve(en.target);
+            track('section-' + id, 'Section lue : ' + SECTIONS[id]);
+          }, 2000);
+        }
+      });
+    }, { rootMargin: '-40% 0px -40% 0px' });
+    Object.keys(SECTIONS).forEach(function (id) { var el = document.getElementById(id); if (el) secObs.observe(el); });
+  }
+
+  // Temps passé sur le site (page visible à l'écran) : paliers de 10 s à 10 min
+  var MILESTONES = [[10, '10s', '10 secondes'], [30, '30s', '30 secondes'], [60, '1min', '1 minute'],
+                    [120, '2min', '2 minutes'], [300, '5min', '5 minutes'], [600, '10min', '10 minutes']];
+  var activeSec = 0, nextMilestone = 0;
+  var timeTimer = setInterval(function () {
+    if (document.visibilityState && document.visibilityState !== 'visible') return;
+    activeSec++;
+    while (nextMilestone < MILESTONES.length && activeSec >= MILESTONES[nextMilestone][0]) {
+      var m = MILESTONES[nextMilestone++];
+      track('temps-' + m[1], 'Temps passé : ' + m[2] + ' ou plus');
+    }
+    if (nextMilestone >= MILESTONES.length) clearInterval(timeTimer);
+  }, 1000);
+
+  /* ---------- Vos questions : envoi du formulaire à syndicat.cftc@irpauto.fr (via FormSubmit) ---------- */
+  var qForm = document.getElementById('questions-form');
+  if (qForm && window.fetch) {
+    var Q_TO = 'syndicat.cftc@irpauto.fr';
+    // En local, jamais d'envoi réel : l'adresse de test n'existe pas (les essais simulent la réponse).
+    var Q_URL = LOCAL ? '/__test-formulaire' : 'https://formsubmit.co/ajax/' + Q_TO;
+    var qMsg = document.getElementById('q-message');
+    var qCount = document.getElementById('q-count');
+    var qStatus = document.getElementById('q-status');
+    var qSend = document.getElementById('q-send');
+    var qDone = document.getElementById('q-done');
+    var Q_FIELDS = ['q-nom', 'q-prenom', 'q-email', 'q-objet', 'q-message'];
+
+    var qCountUpdate = function () {
+      var n = qMsg.value.length;
+      qCount.textContent = n + ' / 5000 caractères';
+      qCount.classList.toggle('is-near', n > 4500);
+    };
+    qMsg.addEventListener('input', qCountUpdate);
+
+    var fieldError = function (input, text) {
+      var field = input.closest('.q-field');
+      var err = field.querySelector('.q-err');
+      field.classList.toggle('is-invalid', !!text);
+      input.setAttribute('aria-invalid', text ? 'true' : 'false');
+      if (text) {
+        if (!err) { err = node('span', 'q-err'); err.id = input.id + '-err'; field.appendChild(err); }
+        err.textContent = text;
+        input.setAttribute('aria-describedby', (input === qMsg ? 'q-count ' : '') + err.id);
+      } else if (err) {
+        err.remove();
+        if (input === qMsg) input.setAttribute('aria-describedby', 'q-count'); else input.removeAttribute('aria-describedby');
+      }
+    };
+    var checkField = function (input) {
+      var val = input.value.trim();
+      if (!val) return 'Ce champ est obligatoire.';
+      if (input.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val)) return 'Vérifiez l\'adresse e-mail (exemple : prenom.nom@exemple.fr).';
+      return '';
+    };
+    Q_FIELDS.forEach(function (id) {
+      var input = document.getElementById(id);
+      input.addEventListener('input', function () { if (input.getAttribute('aria-invalid') === 'true') fieldError(input, checkField(input)); });
+    });
+
+    var qSetStatus = function (kind, content) {
+      qStatus.className = 'q-status' + (kind ? ' is-' + kind : '');
+      qStatus.textContent = '';
+      if (content) qStatus.appendChild(typeof content === 'string' ? document.createTextNode(content) : content);
+      qStatus.hidden = !content;
+    };
+    var mailtoHref = function (d) {
+      var body = 'Nom : ' + d.nom + '\nPrénom : ' + d.prenom + '\nE-mail : ' + d.email + '\n\n' + d.message;
+      if (body.length > 1500) body = body.slice(0, 1500) + '…';
+      return 'mailto:' + Q_TO + '?subject=' + encodeURIComponent('Vos questions : ' + d.objet) + '&body=' + encodeURIComponent(body);
+    };
+
+    qForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var firstBad = null;
+      Q_FIELDS.forEach(function (id) {
+        var input = document.getElementById(id);
+        var msg = checkField(input);
+        fieldError(input, msg);
+        if (msg && !firstBad) firstBad = input;
+      });
+      if (firstBad) { qSetStatus('error', 'Merci de compléter les champs indiqués.'); firstBad.focus(); return; }
+
+      var d = {
+        nom: document.getElementById('q-nom').value.trim(),
+        prenom: document.getElementById('q-prenom').value.trim(),
+        email: document.getElementById('q-email').value.trim(),
+        objet: document.getElementById('q-objet').value.trim(),
+        message: qMsg.value.trim()
+      };
+      var showDone = function () {
+        qForm.reset(); qCountUpdate(); qSetStatus('', '');
+        qForm.hidden = true; qDone.hidden = false; qDone.focus();
+      };
+      if (document.getElementById('q-site').value) { showDone(); return; }  // robot : on fait semblant
+
+      qSend.disabled = true;
+      qSetStatus('info', 'Envoi en cours…');
+      fetch(Q_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          'Nom': d.nom, 'Prénom': d.prenom, 'email': d.email, 'Objet': d.objet, 'Message': d.message,
+          _subject: 'Site CFTC – Vos questions : ' + d.objet, _template: 'table', _captcha: 'false'
+        })
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          if (!r.ok || String(j.success) !== 'true') throw new Error(j.message || 'HTTP ' + r.status);
+        });
+      }).then(function () {
+        showDone();
+        track('question-envoyee', 'Formulaire « Vos questions » envoyé');
+      }).catch(function () {
+        var span = node('span', '', 'Le message n\'a pas pu être envoyé. Réessayez dans un instant, ou ');
+        var link = node('a', '', 'envoyez-le avec votre messagerie');
+        link.href = mailtoHref(d);
+        span.appendChild(link);
+        span.appendChild(document.createTextNode(' à ' + Q_TO + '.'));
+        qSetStatus('error', span);
+      }).then(function () { qSend.disabled = false; });
+    });
+    document.getElementById('q-again').addEventListener('click', function () {
+      qDone.hidden = true; qForm.hidden = false;
+      document.getElementById('q-objet').focus();
+    });
+  }
+
+  /* ---------- Compte à rebours du scrutin (heure de Paris) ---------- */
+  var VOTE_START = Date.UTC(2026, 10, 22, 23, 0, 0); // lundi 23 novembre 2026, 0h00 à Paris
+  var VOTE_END = Date.UTC(2026, 10, 25, 15, 0, 0);   // mercredi 25 novembre 2026, 16h00 à Paris
+  // Test en local uniquement : index.html?maintenant=2026-11-24T10:00 simule une autre date.
+  var clockShift = 0;
+  if (LOCAL) {
+    var sim = /[?&]maintenant=([^&]+)/.exec(location.search);
+    var simT = sim ? Date.parse(decodeURIComponent(sim[1])) : NaN;
+    if (!isNaN(simT)) clockShift = simT - Date.now();
+  }
+  function now() { return Date.now() + clockShift; }
+
+  var band = document.getElementById('decompte');
+  var cd = document.getElementById('countdown');
+  function two(n) { return n < 10 ? '0' + n : String(n); }
+  function setUnit(id, value, one, many, pad) {
+    document.getElementById(id).textContent = pad ? two(value) : String(value);
+    document.getElementById(id + '-l').textContent = value > 1 ? many : one;
+  }
+  function setHtml(el, html) { if (el.innerHTML !== html) el.innerHTML = html; }
+  function tick() {
+    var t = now();
+    var open = t >= VOTE_START && t < VOTE_END;
+    if (band) {
+      if (open) {
+        var left = Math.ceil((VOTE_END - t) / 60000);  // minutes restantes, arrondies au-dessus
+        setUnit('cd-j', Math.floor(left / 1440), 'jour', 'jours');
+        setUnit('cd-h', Math.floor(left % 1440 / 60), 'heure', 'heures', true);
+        setUnit('cd-m', left % 60, 'minute', 'minutes', true);
+      }
+      if (band.hidden === open) {
+        band.hidden = !open;
+        document.documentElement.classList.toggle('cd-on', open);
+      }
+    }
+    if (cd) {
+      if (t < VOTE_START) {
+        var d0 = new Date(t);
+        var days = Math.round((VOTE_START - new Date(d0.getFullYear(), d0.getMonth(), d0.getDate()).getTime()) / 864e5);
+        setHtml(cd, days <= 1 ? 'Ouverture du vote <b>demain</b>&nbsp;!' : 'Ouverture du vote dans <b>' + days + '&nbsp;jours</b>');
+      } else if (open) {
+        setHtml(cd, '<b>Le vote est ouvert</b> jusqu\'au mercredi 25 novembre à 16h00&nbsp;!');
+      }
+      cd.hidden = t >= VOTE_END;
+    }
+    return t < VOTE_END;
+  }
+  if (band || cd) {
+    var cdTimer = setInterval(function () { if (!tick()) clearInterval(cdTimer); }, 1000);
+    tick();
   }
 })();

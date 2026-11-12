@@ -565,6 +565,7 @@
     show('app');
     if (!$('date').value) $('date').value = today();
     loadList();
+    document.dispatchEvent(new CustomEvent('equipe:connecte'));  // tableau de bord (stats.js)
   }
   function showSetup() {
     show('setup-panel');
@@ -579,6 +580,7 @@
   function logout() {
     token = null;
     clearToken();
+    document.dispatchEvent(new CustomEvent('equipe:deconnecte'));
     if (access) showLogin(); else route();
   }
   function check() {
@@ -688,6 +690,13 @@
   });
   $('change-access').addEventListener('click', function () { location.hash = 'config'; });
   $('logout').addEventListener('click', function () { logout(); clearNotice(); });
+
+  // Outils partagés avec le tableau de bord des statistiques (assets/js/stats.js)
+  window.CFTC_ADMIN = {
+    api: api, commit: commit, explain: explain, logout: logout,
+    token: function () { return token; },
+    repoPath: REPO_PATH, branch: BRANCH, local: LOCAL
+  };
 
   window.addEventListener('hashchange', route);
   route();

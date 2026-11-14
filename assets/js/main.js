@@ -378,12 +378,24 @@
     if (nextMilestone >= MILESTONES.length) clearInterval(timeTimer);
   }, 1000);
 
-  /* ---------- Vos questions : envoi du formulaire à syndicat.cftc@irpauto.fr (via FormSubmit) ---------- */
-  var qForm = document.getElementById('questions-form');
-  if (qForm && window.fetch) {
-    var Q_TO = 'syndicat.cftc@irpauto.fr';
-    // En local, jamais d'envoi réel : l'adresse de test n'existe pas (les essais simulent la réponse).
-    var Q_URL = LOCAL ? '/__test-formulaire' : 'https://formsubmit.co/ajax/' + Q_TO;
+  /* ---------- Vos questions : envoi du formulaire à syndicat.cftc@irpauto.fr (via FormSubmit) ----------
+     Masqué sur le site en ligne pour l'instant (attribut « hidden » dans index.html) ; il s'affiche en local (localhost).
+     En local, le fichier assets/js/test-local.js, jamais publié (voir .gitignore), peut donner une adresse de test :
+       window.CFTC_TEST = { questionsTo: 'adresse@exemple.fr' };
+     les messages partent alors vraiment vers cette adresse. Sans ce fichier, l'envoi est simulé. */
+  var initQuestions = function () {
+    var qForm = document.getElementById('questions-form');
+    if (!qForm || !window.fetch) return;
+    var qTest = LOCAL && window.CFTC_TEST && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(window.CFTC_TEST.questionsTo || '') ? window.CFTC_TEST.questionsTo : null;
+    var Q_TO = qTest || 'syndicat.cftc@irpauto.fr';
+    var Q_URL = LOCAL && !qTest ? '/__test-formulaire' : 'https://formsubmit.co/ajax/' + Q_TO;
+    if (qTest) {
+      var qPriv = qForm.querySelector('.q-privacy a');
+      if (qPriv) { qPriv.href = 'mailto:' + Q_TO; qPriv.textContent = Q_TO; }
+      var qNote = node('p', 'q-status is-info', 'Test en local : les messages partent vraiment vers ' + Q_TO + '. Le site en ligne n\'est pas concerné.');
+      qNote.style.margin = '0 0 18px';
+      qForm.insertBefore(qNote, qForm.firstChild);
+    }
     var qMsg = document.getElementById('q-message');
     var qCount = document.getElementById('q-count');
     var qStatus = document.getElementById('q-status');
@@ -488,6 +500,15 @@
       qDone.hidden = true; qForm.hidden = false;
       document.getElementById('q-objet').focus();
     });
+  };
+  if (LOCAL) {
+    document.querySelectorAll('#questions[hidden], a[href="#questions"][hidden]').forEach(function (el) { el.hidden = false; });
+    var qScript = document.createElement('script');
+    qScript.src = 'assets/js/test-local.js?t=' + Date.now();
+    qScript.onload = qScript.onerror = initQuestions;
+    document.head.appendChild(qScript);
+  } else {
+    initQuestions();
   }
 
   /* ---------- Compte à rebours du scrutin (heure de Paris) ---------- */

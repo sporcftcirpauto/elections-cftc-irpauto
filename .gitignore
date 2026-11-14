@@ -4,3 +4,6 @@
 
 # Configuration locale
 .claude/
+
+# Essais en local (adresse de test du formulaire « Vos questions ») : jamais publié
+/assets/js/test-local.js

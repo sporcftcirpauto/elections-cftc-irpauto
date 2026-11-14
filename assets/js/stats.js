@@ -292,7 +292,7 @@
   var TIME_STEPS = [[10, '10s', 'Plus de 10 secondes'], [30, '30s', 'Plus de 30 secondes'], [60, '1min', 'Plus d\'1 minute'],
                     [120, '2min', 'Plus de 2 minutes'], [300, '5min', 'Plus de 5 minutes'], [600, '10min', 'Plus de 10 minutes']];
   var SECTIONS = [['ambition', 'Notre ambition'], ['bilan', 'Notre bilan'], ['engagements', 'Nos engagements'], ['video', 'Vidéo'],
-                  ['equipe', 'Notre équipe'], ['tracts', 'Nos tracts'], ['comment-voter', 'Comment voter ?'],
+                  ['equipe', 'Notre équipe'], ['tracts', 'Nos tracts & vidéos'], ['comment-voter', 'Comment voter ?'],
                   ['questions', 'Vos questions'], ['vote', 'Jouons collectif (bas de page)']];
   var DOCS = [['pdf-cftc-profession-de-foi', 'Profession de foi'], ['pdf-cftc-liste-candidats', 'Liste des candidats'],
               ['pdf-cftc-nos-engagements', 'Nos engagements'], ['pdf-cftc-notre-ambition', 'Notre ambition'],

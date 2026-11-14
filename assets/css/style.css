@@ -154,7 +154,7 @@ strong, b { font-weight: 700; }
 
 /* Menu en ligne (6 liens + 2 boutons) : en-tête un peu plus large que le contenu, format compact */
 .site-header .container { max-width: 1400px; }
-@media (min-width: 1360px) {
+@media (min-width: 1420px) {
   .header-inner { gap: 14px; }
   .brand-text strong { font-size: 1.12rem; }
   .brand-text span { display: none; }
@@ -164,7 +164,7 @@ strong, b { font-weight: 700; }
   .header-login { margin-left: -4px; }
 }
 /* Menu « burger » dès que les 6 liens et les 2 boutons ne tiennent plus sur une ligne */
-@media (max-width: 1359px) {
+@media (max-width: 1419px) {
   .header-cta { margin-left: auto; }
   .header-cta + .header-cta { margin-left: -12px; }
   .burger { display: inline-flex; margin-left: 0; }
@@ -388,7 +388,7 @@ strong, b { font-weight: 700; }
 @media (prefers-reduced-motion: reduce) { .js .reveal { opacity: 1; transform: none; transition: none; } }
 
 /* =========================================================
-   Nos tracts
+   Nos tracts & vidéos
    ========================================================= */
 .tracts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .tract {

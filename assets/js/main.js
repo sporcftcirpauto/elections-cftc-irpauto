@@ -233,7 +233,7 @@
     list.sort(function (a, b) {
       return String(b.date || '').localeCompare(String(a.date || '')) || String(b.publie_le || '').localeCompare(String(a.publie_le || ''));
     });
-    // Aucun tract publié : le message « Nos tracts arrivent très bientôt » reste affiché.
+    // Aucun tract publié : le message « Nos tracts et vidéos arrivent très bientôt » reste affiché.
     if (!list.length) return;
     var ul = document.getElementById('tracts-list');
     list.forEach(function (t, i) {
@@ -344,7 +344,7 @@
   // Parties du site lues : la section reste au milieu de l'écran pendant au moins 2 secondes
   var SECTIONS = {
     ambition: 'Notre ambition', bilan: 'Notre bilan', engagements: 'Nos engagements', video: 'Vidéo',
-    equipe: 'Notre équipe', tracts: 'Nos tracts', 'comment-voter': 'Comment voter ?',
+    equipe: 'Notre équipe', tracts: 'Nos tracts & vidéos', 'comment-voter': 'Comment voter ?',
     questions: 'Vos questions', vote: 'Jouons collectif (bas de page)'
   };
   if ('IntersectionObserver' in window) {

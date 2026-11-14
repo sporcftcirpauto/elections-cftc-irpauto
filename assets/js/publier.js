@@ -503,7 +503,7 @@
         });
       })
       .then(function () {
-        notify('success', 'Tract publié ! Il apparaîtra sur le site d\'ici 1 à 2 minutes.', { href: './#tracts', text: 'Voir la rubrique « Nos tracts »', blank: true });
+        notify('success', 'Tract publié ! Il apparaîtra sur le site d\'ici 1 à 2 minutes.', { href: './#tracts', text: 'Voir la rubrique « Nos tracts & vidéos »', blank: true });
         $('tract-form').reset();
         $('date').value = today();
         $('resume-count').textContent = '0';
@@ -571,7 +571,7 @@
     if (!list.length) {
       var li0 = document.createElement('li');
       li0.className = 'empty';
-      li0.textContent = 'Aucun tract publié pour le moment. La rubrique « Nos tracts » apparaîtra sur le site dès le premier tract.';
+      li0.textContent = 'Aucun tract publié pour le moment. La rubrique « Nos tracts & vidéos » apparaîtra sur le site dès le premier tract.';
       ul.appendChild(li0);
       return;
     }

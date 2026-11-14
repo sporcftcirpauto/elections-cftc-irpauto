@@ -121,43 +121,28 @@
   function tractCard(t) {
     var file = safePath(t.fichier);
     var video = safePath(t.video);
-    var preview = safePath(t.apercu) || (t.type === 'image' ? file : null) || safePath(t.video_apercu);
+    var preview = safePath(t.apercu) || (t.type === 'image' ? file : null);
     var day = parseDay(t.date);
+    var isNew = day && (Date.now() - day.getTime()) < 8 * 24 * 3600 * 1000;
     var li = node('li', 'tract');
 
-    var cover;
     if (file) {
-      cover = node('a', 'tract-cover');
+      var cover = node('a', 'tract-cover');
       cover.href = file; cover.target = '_blank'; cover.rel = 'noopener';
       cover.setAttribute('aria-label', 'Ouvrir le tract « ' + t.titre + ' »');
-    } else {
-      // Vidéo seule : l'image ouvre le lecteur
-      cover = node('button', 'tract-cover tract-cover-video');
-      cover.type = 'button';
-      cover.setAttribute('aria-label', 'Regarder la vidéo « ' + t.titre + ' »');
-      cover.addEventListener('click', function () { openVideo(t); });
+      if (preview) {
+        var img = node('img');
+        img.src = preview; img.alt = ''; img.loading = 'lazy';
+        img.onerror = function () { img.replaceWith(fallback()); };
+        cover.appendChild(img);
+      } else {
+        cover.appendChild(fallback());
+      }
+      if (isNew) cover.appendChild(node('span', 'tract-new', 'Nouveau'));
+      li.appendChild(cover);
     }
-    if (preview) {
-      var img = node('img');
-      img.src = preview; img.alt = ''; img.loading = 'lazy';
-      img.onerror = function () { img.replaceWith(fallback(!file)); };
-      cover.appendChild(img);
-    } else {
-      cover.appendChild(fallback(!file));
-    }
-    if (!file) {
-      var play = node('span', 'tract-play');
-      play.appendChild(node('span', 'tract-play-btn'));
-      cover.appendChild(play);
-    }
-    if (video) {
-      var badge = node('span', 'tract-video-badge');
-      badge.appendChild(icon('i-play'));
-      badge.appendChild(document.createTextNode('Vidéo' + (videoLength(t.video_duree) ? ' · ' + videoLength(t.video_duree) : '')));
-      cover.appendChild(badge);
-    }
-    if (day && (Date.now() - day.getTime()) < 8 * 24 * 3600 * 1000) cover.appendChild(node('span', 'tract-new', 'Nouveau'));
-    li.appendChild(cover);
+    // La vidéo se place sous le tract (ou en haut de la carte s'il n'y a qu'elle)
+    if (video) li.appendChild(videoBlock(t, video, isNew && !file));
 
     var body = node('div', 'tract-body');
     if (day) {
@@ -168,95 +153,80 @@
     }
     body.appendChild(node('h3', '', t.titre));
     if (t.resume) body.appendChild(node('p', 'tract-resume', t.resume));
-    var actions = node('p', 'tract-actions');
     if (file) {
+      var actions = node('p', 'tract-actions');
       var a = node('a', 'btn btn-pink btn-sm', t.type === 'image' ? 'Voir le tract ' : 'Lire le tract ');
       a.href = file; a.target = '_blank'; a.rel = 'noopener';
       a.appendChild(icon('i-ext'));
       actions.appendChild(a);
+      body.appendChild(actions);
     }
-    if (video) {
-      var vb = node('button', 'btn btn-teal btn-sm');
-      vb.type = 'button';
-      vb.appendChild(icon('i-play'));
-      vb.appendChild(document.createTextNode(' Voir la vidéo'));
-      vb.addEventListener('click', function () { openVideo(t); });
-      actions.appendChild(vb);
-    }
-    body.appendChild(actions);
     li.appendChild(body);
     return li;
   }
-  function fallback(isVideo) {
+  function fallback() {
     var f = node('span', 'tract-fallback');
-    f.appendChild(icon(isVideo ? 'i-play' : 'i-file'));
-    f.appendChild(document.createTextNode(isVideo ? 'VIDÉO CFTC' : 'TRACT CFTC'));
+    f.appendChild(icon('i-file'));
+    f.appendChild(document.createTextNode('TRACT CFTC'));
     return f;
   }
 
-  /* Lecteur vidéo des tracts : fenêtre par-dessus la page, adaptée aux vidéos verticales */
-  var vDialog = null, vPlayer = null, vTitle = null, vRatio = 16 / 9, vOpener = null;
-  function fitVideo() {
-    if (!vDialog || !vDialog.open) return;
-    var head = vDialog.querySelector('.vdialog-head').offsetHeight;
-    var maxW = Math.min(1100, window.innerWidth - 24), maxH = window.innerHeight - 24 - head;
-    var w = Math.max(240, Math.min(maxW, maxH * vRatio));
-    vDialog.style.width = Math.round(w) + 'px';
-    vPlayer.style.width = Math.round(w) + 'px';
-    vPlayer.style.height = Math.round(w / vRatio) + 'px';
-  }
-  function buildVideoDialog() {
-    vDialog = node('dialog', 'vdialog');
-    vDialog.setAttribute('aria-labelledby', 'vdialog-title');
-    var head = node('div', 'vdialog-head');
-    vTitle = node('p', 'vdialog-title');
-    vTitle.id = 'vdialog-title';
-    var close = node('button', 'vdialog-close');
-    close.type = 'button';
-    close.setAttribute('aria-label', 'Fermer la vidéo');
-    close.appendChild(icon('i-close'));
-    close.addEventListener('click', function () { vDialog.close(); });
-    head.appendChild(vTitle);
-    head.appendChild(close);
-    vPlayer = node('video');
-    vPlayer.controls = true;
-    vPlayer.preload = 'metadata';
-    vPlayer.setAttribute('playsinline', '');
-    vPlayer.addEventListener('loadedmetadata', function () {
-      if (vPlayer.videoWidth && vPlayer.videoHeight) { vRatio = vPlayer.videoWidth / vPlayer.videoHeight; fitVideo(); }
-    });
-    vDialog.appendChild(head);
-    vDialog.appendChild(vPlayer);
-    vDialog.addEventListener('click', function (e) { if (e.target === vDialog) vDialog.close(); });  // clic à côté de la vidéo
-    vDialog.addEventListener('close', function () {
-      vPlayer.pause();
-      vPlayer.removeAttribute('src');
-      vPlayer.removeAttribute('poster');
-      vPlayer.load();  // arrête le téléchargement
-      document.documentElement.classList.remove('vdialog-on');
-      if (vOpener && vOpener.focus && document.contains(vOpener)) vOpener.focus();
-    });
-    window.addEventListener('resize', fitVideo);
-    document.body.appendChild(vDialog);
-  }
-  function openVideo(t) {
-    var src = safePath(t.video);
-    if (!src) return;
-    track('video-tract-' + slug(t.id || src), 'Vidéo du tract : ' + t.titre);
-    if (typeof document.createElement('dialog').showModal !== 'function') { window.open(src, '_blank', 'noopener'); return; }
-    if (!vDialog) buildVideoDialog();
-    vOpener = document.activeElement;
-    vTitle.textContent = t.titre;
-    vRatio = t.video_largeur > 0 && t.video_hauteur > 0 ? t.video_largeur / t.video_hauteur : 16 / 9;
+  /* Vidéo d'un tract : l'image de la vidéo, puis le lecteur à la place au premier clic
+     (rien n'est téléchargé tant que personne ne lance la vidéo) */
+  function videoBlock(t, src, isNew) {
+    var box = node('div', 'tract-video');
+    var ratio = t.video_largeur > 0 && t.video_hauteur > 0 ? t.video_largeur / t.video_hauteur : 16 / 9;
+    box.style.aspectRatio = String(Math.min(2, Math.max(0.8, ratio)));  // vidéo verticale : cadre 4:5 au plus haut
     var poster = safePath(t.video_apercu);
-    if (poster) vPlayer.poster = poster; else vPlayer.removeAttribute('poster');
-    vPlayer.src = src;
-    document.documentElement.classList.add('vdialog-on');
-    vDialog.showModal();
-    fitVideo();
-    var p = vPlayer.play();  // lancée pendant le clic : le son est autorisé
-    if (p && p.catch) p.catch(function () { /* lecture refusée : les commandes restent disponibles */ });
+    var len = videoLength(t.video_duree);
+
+    var bg = null;
+    if (poster) {
+      bg = node('img', 'tract-video-bg');
+      bg.src = poster; bg.alt = ''; bg.loading = 'lazy';
+      box.appendChild(bg);
+    }
+    var start = node('button', 'tract-video-start');
+    start.type = 'button';
+    var sec = Math.round(+t.video_duree || 0);
+    start.setAttribute('aria-label', 'Lire la vidéo « ' + t.titre + ' »' +
+      (sec ? ', durée ' + (sec >= 60 ? Math.floor(sec / 60) + ' min ' : '') + (sec % 60 ? sec % 60 + ' s' : '') : ''));
+    if (poster) {
+      var im = node('img', 'tract-video-poster');
+      im.src = poster; im.alt = ''; im.loading = 'lazy';
+      im.onerror = function () { im.remove(); if (bg) bg.remove(); };
+      start.appendChild(im);
+    }
+    var play = node('span', 'tract-play');
+    play.appendChild(node('span', 'tract-play-btn'));
+    start.appendChild(play);
+    var badge = node('span', 'tract-video-badge');
+    badge.appendChild(icon('i-play'));
+    badge.appendChild(document.createTextNode('Vidéo' + (len ? ' · ' + len : '')));
+    start.appendChild(badge);
+    if (isNew) start.appendChild(node('span', 'tract-new', 'Nouveau'));
+
+    start.addEventListener('click', function () {
+      track('video-tract-' + slug(t.id || src), 'Vidéo du tract : ' + t.titre);
+      var v = node('video');
+      v.controls = true;
+      v.setAttribute('playsinline', '');
+      v.setAttribute('aria-label', 'Vidéo : ' + t.titre);
+      if (poster) v.poster = poster;
+      v.src = src;
+      start.replaceWith(v);
+      if (v.focus) v.focus({ preventScroll: true });
+      var p = v.play();  // lancée pendant le clic : le son est autorisé
+      if (p && p.catch) p.catch(function () { /* lecture refusée : les commandes restent disponibles */ });
+    });
+    box.appendChild(start);
+    return box;
   }
+
+  // Une seule vidéo à la fois : en lancer une met les autres en pause
+  document.addEventListener('play', function (e) {
+    document.querySelectorAll('video').forEach(function (v) { if (v !== e.target && !v.paused) v.pause(); });
+  }, true);
 
   function renderTracts(list) {
     list = (list || []).filter(function (t) { return t && t.titre && (safePath(t.fichier) || safePath(t.video)); });

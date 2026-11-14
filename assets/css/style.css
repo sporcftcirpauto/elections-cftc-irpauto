@@ -409,26 +409,19 @@ strong, b { font-weight: 700; }
 .tract-resume { margin: 0; color: var(--muted); font-size: .92rem; line-height: 1.55; }
 .tract-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: auto 0 0; padding-top: 10px; }
 
-/* Tracts avec vidéo */
-.tract-cover-video { width: 100%; padding: 0; border: 0; border-bottom: 1px solid var(--line); font: inherit; cursor: pointer; }
-.tract-cover-video:focus-visible { outline: 3px solid var(--yellow); outline-offset: -3px; }
+/* Vidéo du tract : sous l'image du tract, lue sur place */
+.tract-video { position: relative; overflow: hidden; aspect-ratio: 16 / 9; background: var(--blue-deep); border-bottom: 1px solid var(--line); }
+.tract-video-bg { position: absolute; inset: -24px; width: calc(100% + 48px); height: calc(100% + 48px); object-fit: cover; filter: blur(18px) brightness(.55); }
+.tract-video-start { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
+.tract-video-start:focus-visible { outline: 3px solid var(--yellow); outline-offset: -3px; }
+.tract-video-poster, .tract-video video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.tract-video video { display: block; }
 .tract-play { position: absolute; inset: 0; display: grid; place-items: center; background: linear-gradient(180deg, rgba(10, 33, 80, 0) 45%, rgba(10, 33, 80, .4)); }
 .tract-play-btn { display: grid; place-items: center; width: 66px; height: 66px; border-radius: 50%; background: var(--pink); box-shadow: 0 10px 26px rgba(234, 79, 112, .45); transition: transform .2s ease; }
 .tract-play-btn::after { content: ""; width: 22px; height: 26px; margin-left: 6px; background: #fff; clip-path: polygon(0 0, 100% 50%, 0 100%); }
-.tract:hover .tract-play-btn { transform: scale(1.08); }
+.tract-video-start:hover .tract-play-btn { transform: scale(1.08); }
 .tract-video-badge { position: absolute; right: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px 5px 8px; border-radius: 999px; background: rgba(14, 44, 102, .9); color: #fff; font-size: .75rem; font-weight: 700; letter-spacing: .02em; }
 .tract-video-badge .i { width: 16px; height: 16px; }
-
-/* Lecteur vidéo (fenêtre) */
-html.vdialog-on { overflow: hidden; }
-.vdialog { padding: 0; border: 0; border-radius: 14px; overflow: hidden; background: #000; color: #fff; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); box-shadow: var(--shadow-lg); }
-.vdialog::backdrop { background: rgba(10, 21, 50, .84); }
-.vdialog-head { display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 18px; background: var(--blue-deep); }
-.vdialog-title { flex: 1; min-width: 0; margin: 0; font-size: .95rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.vdialog-close { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .14); color: #fff; cursor: pointer; }
-.vdialog-close:hover { background: rgba(255, 255, 255, .26); }
-.vdialog-close:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
-.vdialog video { display: block; background: #000; }
 .btn-sm { padding: .62em 1.15em; font-size: .86rem; }
 .tracts-more { margin: 32px 0 0; }
 .tracts-empty {

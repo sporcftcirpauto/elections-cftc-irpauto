@@ -57,6 +57,10 @@ body.admin { background: var(--bg-soft); }
 .dz-thumb { display: grid; place-items: center; width: 92px; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; background: #fff; border: 1px solid var(--line); flex: none; box-shadow: var(--shadow-sm); }
 .dz-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .dz-thumb .i { width: 34px; height: 34px; color: var(--blue); }
+.dz-thumb-video { width: 128px; aspect-ratio: 16 / 10; background: var(--blue-deep); }
+.dz-thumb-video img { object-fit: contain; object-position: center; background: #000; }
+.dz-thumb-video .i { color: #fff; }
+#video-remove { padding: 0 0 0 4px; font-size: .82rem; }
 .dz-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .dz-meta strong { color: var(--ink); overflow-wrap: anywhere; }
 .dz-meta > span { color: var(--muted); font-size: .86rem; }

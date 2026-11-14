@@ -397,6 +397,10 @@
       .map(function (k) { return { label: String(a.titles[k] || k).replace(/^Tract : /, ''), value: a.ev[k] }; });
     rows.push({ group: 'Tracts' });
     if (tractRows.length) rows = rows.concat(tractRows); else rows.push({ note: 'Aucun tract ouvert sur cette période.' });
+    var tractVideos = Object.keys(a.ev).filter(function (k) { return k.indexOf('video-tract-') === 0; })
+      .sort(function (x, y) { return a.ev[y] - a.ev[x]; })
+      .map(function (k) { return { label: String(a.titles[k] || k).replace(/^Vidéo du tract : /, ''), value: a.ev[k] }; });
+    if (tractVideos.length) rows = rows.concat([{ group: 'Vidéos des tracts' }], tractVideos);
     rows.push({ group: 'Boutons' });
     BUTTONS.forEach(function (x) { rows.push({ label: x[1], value: a.ev[x[0]] || 0 }); });
     barList($('stats-clicks'), rows, n, 'visiteurs');

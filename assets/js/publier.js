@@ -1,8 +1,9 @@
 /* Espace équipe – publication des tracts sur le dépôt GitHub du site.
    Accès : bouton cadenas en haut à droite du site, puis mot de passe de l'équipe, qui
    déchiffre la clé GitHub enregistrée dans tracts/acces.json. Configuration : publier.html#config.
-   Chaque publication ajoute le fichier (et son aperçu) dans tracts/ et met à jour
-   tracts/tracts.json en un seul commit ; GitHub Pages republie le site ensuite. */
+   Chaque publication ajoute le fichier (et son aperçu), et éventuellement une vidéo (et son
+   image), dans tracts/ et met à jour tracts/tracts.json en un seul commit ; GitHub Pages
+   republie le site ensuite. */
 (function () {
   'use strict';
 
@@ -14,6 +15,10 @@
   var ITERATIONS = 600000;
   var MAX_SIZE = 20 * 1024 * 1024;
   var TYPES = { 'application/pdf': 'pdf', 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+  // Vidéos : les .mov (iPhone) et .m4v sont enregistrées en .mp4, que tous les navigateurs savent lire.
+  var VIDEO_TYPES = { 'video/mp4': 'mp4', 'video/quicktime': 'mp4', 'video/x-m4v': 'mp4', 'video/webm': 'webm' };
+  var VIDEO_EXT = { mp4: 'mp4', mov: 'mp4', m4v: 'mp4', webm: 'webm' };
+  var MAX_VIDEO = 50 * 1024 * 1024;
   var PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
   var PDFJS_SRI = 'sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e';
   var STORE_KEY = 'cftc-tracts-cle';
@@ -97,6 +102,31 @@
       }
       if (opts.raw) return res.text();
       return res.status === 204 ? null : res.json();
+    });
+  }
+
+  // Envoi d'un fichier sur GitHub (blob). Avec onProgress, la progression est suivie (vidéos).
+  function createBlob(b64, onProgress) {
+    var body = { content: b64, encoding: 'base64' };
+    if (!onProgress) return api(REPO_PATH + '/git/blobs', { method: 'POST', body: body });
+    return new Promise(function (resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', API + REPO_PATH + '/git/blobs');
+      xhr.setRequestHeader('Accept', 'application/vnd.github+json');
+      xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.upload.onprogress = function (e) { if (e.lengthComputable) onProgress(e.loaded / e.total); };
+      xhr.onload = function () {
+        var data = null;
+        try { data = JSON.parse(xhr.responseText); } catch (e) { /* réponse vide */ }
+        if (xhr.status >= 200 && xhr.status < 300 && data && data.sha) { resolve(data); return; }
+        var err = new Error('HTTP ' + xhr.status);
+        err.status = xhr.status;
+        err.detail = data && data.message ? data.message : xhr.responseText;
+        reject(err);
+      };
+      xhr.onerror = function () { var err = new Error('réseau'); err.status = 0; reject(err); };
+      xhr.send(JSON.stringify(body));
     });
   }
 
@@ -219,6 +249,45 @@
       img.src = url;
     });
   }
+  // Vidéo : image vers la 1re seconde, durée et format, lus par le navigateur.
+  // Si le navigateur ne sait pas la lire, beaucoup de visiteurs ne le pourront pas non plus.
+  function videoInfo(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var v = document.createElement('video');
+      var done = false;
+      var timer = setTimeout(function () { finish(new Error('délai dépassé')); }, 20000);
+      function finish(err, res) {
+        if (done) return;
+        done = true; clearTimeout(timer);
+        v.removeAttribute('src'); v.load(); URL.revokeObjectURL(url);
+        if (err) reject(err); else resolve(res);
+      }
+      v.muted = true; v.playsInline = true; v.preload = 'auto';
+      v.onerror = function () { finish(new Error('vidéo illisible')); };
+      v.onloadedmetadata = function () {
+        if (!v.videoWidth) { finish(new Error('pas d\'image')); return; }
+        var d = isFinite(v.duration) ? v.duration : 0;
+        v.currentTime = d ? Math.min(1, d / 4) : 0.1;
+      };
+      v.onseeked = function () {
+        var w = Math.min(960, v.videoWidth), h = Math.round(v.videoHeight * w / v.videoWidth);
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(v, 0, 0, w, h);
+        canvasToJpeg(canvas).then(function (blob) {
+          if (!blob) { finish(new Error('image impossible')); return; }
+          finish(null, { poster: blob, largeur: v.videoWidth, hauteur: v.videoHeight, duree: isFinite(v.duration) ? Math.round(v.duration) : 0 });
+        });
+      };
+      v.src = url;
+    });
+  }
+  function duration(sec) {
+    if (!sec) return '';
+    var m = Math.floor(sec / 60), s = sec % 60;
+    return m ? m + ' min ' + String(s).padStart(2, '0') + ' s' : s + ' s';
+  }
 
   /* ---------- Choix du fichier ---------- */
   var fileInput = $('fichier');
@@ -263,20 +332,78 @@
     });
   }
 
-  fileInput.addEventListener('change', onFile);
-  ['dragenter', 'dragover'].forEach(function (ev) {
-    dropzone.addEventListener(ev, function (e) { e.preventDefault(); dropzone.classList.add('is-over'); });
-  });
-  ['dragleave', 'drop'].forEach(function (ev) {
-    dropzone.addEventListener(ev, function () { dropzone.classList.remove('is-over'); });
-  });
-  dropzone.addEventListener('drop', function (e) {
-    e.preventDefault();
-    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
-      fileInput.files = e.dataTransfer.files;
-      onFile();
+  function dropTarget(zone, input, handler) {
+    input.addEventListener('change', handler);
+    ['dragenter', 'dragover'].forEach(function (ev) {
+      zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('is-over'); });
+    });
+    ['dragleave', 'drop'].forEach(function (ev) {
+      zone.addEventListener(ev, function () { zone.classList.remove('is-over'); });
+    });
+    zone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+        input.files = e.dataTransfer.files;
+        handler();
+      }
+    });
+  }
+  dropTarget(dropzone, fileInput, onFile);
+
+  /* ---------- Choix de la vidéo (facultative) ---------- */
+  var videoInput = $('video');
+  var videoZone = $('video-dropzone');
+  var vid = null;  // { file, ext, poster, largeur, hauteur, duree }
+
+  function videoExt(file) {
+    var m = /\.([a-z0-9]+)$/i.exec(file.name || '');
+    return VIDEO_TYPES[file.type] || (m && VIDEO_EXT[m[1].toLowerCase()]) || null;
+  }
+  function resetVideo() {
+    videoInput.value = '';
+    vid = null;
+    $('vdz-empty').hidden = false;
+    $('vdz-file').hidden = true;
+    $('video-remove').hidden = true;
+    var img = $('vthumb');
+    if (img.src) URL.revokeObjectURL(img.src);
+    img.removeAttribute('src'); img.hidden = true;
+    $('vthumb-ico').style.display = '';
+  }
+  function onVideo() {
+    var file = videoInput.files && videoInput.files[0];
+    dropzone.parentNode.classList.remove('has-error');
+    if (!file) { resetVideo(); return; }
+    var ext = videoExt(file);
+    if (!ext) { resetVideo(); notify('error', 'Ce format de vidéo n\'est pas accepté. Choisissez une vidéo MP4 (ou MOV, WebM).'); return; }
+    if (file.size > MAX_VIDEO) {
+      resetVideo();
+      notify('error', 'La vidéo est trop lourde (' + size(file.size) + '). La taille maximale est de 50 Mo : envoyez-la-vous par WhatsApp puis enregistrez-la, elle sera allégée.');
+      return;
     }
-  });
+    clearNotice();
+    var current = vid = { file: file, ext: ext, poster: null, largeur: 0, hauteur: 0, duree: 0 };
+    $('vdz-empty').hidden = true;
+    $('vdz-file').hidden = false;
+    $('video-remove').hidden = false;
+    $('video-name').textContent = file.name;
+    $('video-info').textContent = 'Vidéo · ' + size(file.size) + ' · vérification…';
+    var img = $('vthumb');
+    img.hidden = true; $('vthumb-ico').style.display = '';
+    videoInfo(file).then(function (info) {
+      if (vid !== current) return;
+      current.poster = info.poster; current.largeur = info.largeur; current.hauteur = info.hauteur; current.duree = info.duree;
+      if (img.src) URL.revokeObjectURL(img.src);
+      img.src = URL.createObjectURL(info.poster);
+      img.hidden = false; $('vthumb-ico').style.display = 'none';
+      $('video-info').textContent = 'Vidéo · ' + size(file.size) + (info.duree ? ' · ' + duration(info.duree) : '');
+    }).catch(function () {
+      if (vid !== current) return;
+      $('video-info').textContent = 'Vidéo · ' + size(file.size) + ' · ce navigateur ne sait pas la lire : vérifiez qu\'elle s\'ouvre sur un autre appareil, ou préférez une vidéo MP4.';
+    });
+  }
+  dropTarget(videoZone, videoInput, onVideo);
+  $('video-remove').addEventListener('click', resetVideo);
 
   $('resume').addEventListener('input', function () { $('resume-count').textContent = this.value.length; });
 
@@ -291,30 +418,56 @@
     var resume = $('resume').value.trim();
     var file = fileInput.files && fileInput.files[0];
 
+    var v = vid;
     fieldError('titre', !titre);
     fieldError('date', !/^\d{4}-\d{2}-\d{2}$/.test(date));
-    fieldError('fichier', !file);
-    if (!titre || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !file) {
-      notify('error', 'Merci de renseigner le titre, la date et le fichier du tract.');
+    fieldError('fichier', !file && !v);
+    if (!titre || !/^\d{4}-\d{2}-\d{2}$/.test(date) || (!file && !v)) {
+      notify('error', 'Merci de renseigner le titre, la date et le fichier du tract (ou une vidéo).');
       return;
     }
 
-    var ext = TYPES[file.type];
+    var ext = file ? TYPES[file.type] : null;
+    var thumb = thumbBlob;
     var btn = $('publish-btn');
     busy = true; btn.disabled = true;
-    var fileSha, thumbSha = null, entry;
+    var fileSha = null, thumbSha = null, videoSha = null, posterSha = null, entry, phase = 'fichier';
+    function send(blob) { return toBase64(blob).then(function (b64) { return createBlob(b64); }); }
 
-    notify('info', 'Envoi du fichier (' + size(file.size) + ')… Merci de ne pas fermer la page.');
-    toBase64(file)
-      .then(function (b64) { return api(REPO_PATH + '/git/blobs', { method: 'POST', body: { content: b64, encoding: 'base64' } }); })
-      .then(function (blob) {
+    var steps = Promise.resolve();
+    if (file) {
+      steps = steps.then(function () {
+        notify('info', 'Envoi du fichier (' + size(file.size) + ')… Merci de ne pas fermer la page.');
+        return send(file);
+      }).then(function (blob) {
         fileSha = blob.sha;
-        if (!thumbBlob) return null;
+        if (!thumb) return null;
         notify('info', 'Envoi de l\'aperçu…');
-        return toBase64(thumbBlob).then(function (b64) {
-          return api(REPO_PATH + '/git/blobs', { method: 'POST', body: { content: b64, encoding: 'base64' } });
-        }).then(function (b) { thumbSha = b.sha; });
-      })
+        return send(thumb).then(function (b) { thumbSha = b.sha; });
+      });
+    }
+    if (v) {
+      steps = steps.then(function () {
+        phase = 'video';
+        notify('info', 'Envoi de la vidéo (' + size(v.file.size) + ')… Merci de ne pas fermer la page.');
+        return toBase64(v.file);
+      }).then(function (b64) {
+        var shown = -1;
+        return createBlob(b64, function (p) {
+          var pct = Math.min(99, Math.floor(p * 10) * 10);  // par paliers de 10 %
+          if (pct === shown) return;
+          shown = pct;
+          notify('info', 'Envoi de la vidéo : ' + pct + ' %… Merci de ne pas fermer la page.');
+        });
+      }).then(function (blob) {
+        videoSha = blob.sha;
+        phase = 'fichier';
+        if (!v.poster) return null;
+        return send(v.poster).then(function (b) { posterSha = b.sha; });
+      });
+    }
+
+    steps
       .then(function () {
         notify('info', 'Mise à jour de la liste des tracts…');
         return commit(function (data) {
@@ -326,17 +479,27 @@
             titre: titre,
             date: date,
             resume: resume,
-            fichier: 'tracts/' + id + '.' + ext,
+            fichier: file ? 'tracts/' + id + '.' + ext : null,
             apercu: thumbSha ? 'tracts/' + id + '-apercu.jpg' : null,
-            type: ext === 'pdf' ? 'pdf' : 'image',
+            type: file ? (ext === 'pdf' ? 'pdf' : 'image') : 'video',
             publie_le: new Date().toISOString()
           };
+          if (v) {
+            entry.video = 'tracts/' + id + '-video.' + v.ext;
+            entry.video_apercu = posterSha ? 'tracts/' + id + '-video.jpg' : null;
+            entry.video_duree = v.duree || null;
+            entry.video_largeur = v.largeur || null;
+            entry.video_hauteur = v.hauteur || null;
+          }
           data.tracts.push(entry);
           sortTracts(data.tracts);
-          var entries = [{ path: entry.fichier, mode: '100644', type: 'blob', sha: fileSha }];
+          var entries = [];
+          if (fileSha) entries.push({ path: entry.fichier, mode: '100644', type: 'blob', sha: fileSha });
           if (thumbSha) entries.push({ path: entry.apercu, mode: '100644', type: 'blob', sha: thumbSha });
+          if (videoSha) entries.push({ path: entry.video, mode: '100644', type: 'blob', sha: videoSha });
+          if (posterSha) entries.push({ path: entry.video_apercu, mode: '100644', type: 'blob', sha: posterSha });
           entries.push({ path: DATA_PATH, mode: '100644', type: 'blob', content: JSON.stringify(data, null, 2) + '\n' });
-          return { entries: entries, message: 'Tract : ' + titre };
+          return { entries: entries, message: 'Tract : ' + titre + (v ? (file ? ' (avec vidéo)' : ' (vidéo)') : '') };
         });
       })
       .then(function () {
@@ -345,11 +508,17 @@
         $('date').value = today();
         $('resume-count').textContent = '0';
         resetFile();
+        resetVideo();
         loadList();
         watchOnline(entry.id, true);
       })
       .catch(function (err) {
         if (err && err.status === 401) { logout(); }
+        if (phase === 'video' && !(err && err.status === 401)) {
+          notify('error', 'Le tract n\'a pas été publié : l\'envoi de la vidéo a échoué' + (err && err.status ? ' (erreur ' + err.status + ')' : '') +
+            '. Vérifiez votre connexion internet, ou essayez une vidéo plus légère (envoyée par WhatsApp, par exemple).');
+          return;
+        }
         notify('error', 'Le tract n\'a pas été publié. ' + explain(err));
       })
       .then(function () { busy = false; btn.disabled = false; });
@@ -412,7 +581,7 @@
 
       var th = document.createElement('span');
       th.className = 'admin-item-thumb';
-      var prev = safePath(t.apercu) || (t.type === 'image' ? safePath(t.fichier) : null);
+      var prev = safePath(t.apercu) || (t.type === 'image' ? safePath(t.fichier) : null) || safePath(t.video_apercu);
       var ico = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       ico.setAttribute('class', 'i');
       var u = document.createElementNS('http://www.w3.org/2000/svg', 'use');
@@ -427,7 +596,10 @@
       var txt = document.createElement('span');
       txt.className = 'admin-item-txt';
       var strong = document.createElement('strong'); strong.textContent = t.titre;
-      var meta = document.createElement('span'); meta.textContent = frDate(t.date) + (t.type === 'image' ? ' · image' : ' · PDF');
+      var kinds = [];
+      if (safePath(t.fichier)) kinds.push(t.type === 'image' ? 'image' : 'PDF');
+      if (safePath(t.video)) kinds.push('vidéo' + (t.video_duree ? ' (' + duration(t.video_duree) + ')' : ''));
+      var meta = document.createElement('span'); meta.textContent = [frDate(t.date)].concat(kinds).join(' · ');
       txt.appendChild(strong); txt.appendChild(meta);
 
       var actions = document.createElement('span');
@@ -437,6 +609,12 @@
         view.className = 'link-btn'; view.href = t.fichier; view.target = '_blank'; view.rel = 'noopener';
         view.textContent = 'Voir';
         actions.appendChild(view);
+      }
+      if (safePath(t.video)) {
+        var watch = document.createElement('a');
+        watch.className = 'link-btn'; watch.href = t.video; watch.target = '_blank'; watch.rel = 'noopener';
+        watch.textContent = 'Vidéo';
+        actions.appendChild(watch);
       }
       var del = document.createElement('button');
       del.type = 'button'; del.className = 'link-btn btn-danger';
@@ -459,7 +637,7 @@
       if (!found) { var e = new Error('introuvable'); e.status = 0; e.gone = true; throw e; }
       data.tracts = data.tracts.filter(function (x) { return x.id !== t.id; });
       var entries = [];
-      [found.fichier, found.apercu].forEach(function (p) {
+      [found.fichier, found.apercu, found.video, found.video_apercu].forEach(function (p) {
         if (safePath(p) && !entries.some(function (x) { return x.path === p; })) entries.push({ path: p, mode: '100644', type: 'blob', sha: null });
       });
       entries.push({ path: DATA_PATH, mode: '100644', type: 'blob', content: JSON.stringify(data, null, 2) + '\n' });

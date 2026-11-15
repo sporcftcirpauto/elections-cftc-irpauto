@@ -1,21 +1,6 @@
 {
   "tracts": [
     {
-      "id": "2026-11-18-communication-dsi",
-      "titre": "Communication DSI",
-      "date": "2026-11-18",
-      "resume": "La DSI n'est pas un simple \"support\", c'est une expertise au soutien de tous : elle doit être soutenue !",
-      "fichier": "tracts/2026-11-18-communication-dsi.pdf",
-      "apercu": "tracts/2026-11-18-communication-dsi-apercu.jpg",
-      "type": "pdf",
-      "publie_le": "2026-11-15T18:28:07.124Z",
-      "video": "tracts/2026-11-18-communication-dsi-video.mp4",
-      "video_apercu": "tracts/2026-11-18-communication-dsi-video.jpg",
-      "video_duree": 76,
-      "video_largeur": 1920,
-      "video_hauteur": 1080
-    },
-    {
       "id": "2026-11-15-communication-paris-poles-et-br",
       "titre": "Communication Paris, Pôles et BR",
       "date": "2026-11-15",

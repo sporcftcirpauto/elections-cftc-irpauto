@@ -1,3 +1,19 @@
 {
-  "tracts": []
+  "tracts": [
+    {
+      "id": "2026-11-15-communication-site-angouleme",
+      "titre": "Communication Site Angoulême",
+      "date": "2026-11-15",
+      "resume": "Angoulême : à chaque métier, des réponses adaptées !",
+      "fichier": "tracts/2026-11-15-communication-site-angouleme.pdf",
+      "apercu": "tracts/2026-11-15-communication-site-angouleme-apercu.jpg",
+      "type": "pdf",
+      "publie_le": "2026-11-15T08:22:48.938Z",
+      "video": "tracts/2026-11-15-communication-site-angouleme-video.mp4",
+      "video_apercu": "tracts/2026-11-15-communication-site-angouleme-video.jpg",
+      "video_duree": 78,
+      "video_largeur": 1920,
+      "video_hauteur": 1080
+    }
+  ]
 }

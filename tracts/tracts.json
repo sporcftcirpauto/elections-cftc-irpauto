@@ -1,6 +1,21 @@
 {
   "tracts": [
     {
+      "id": "2026-11-18-communication-managers",
+      "titre": "Communication Managers",
+      "date": "2026-11-18",
+      "resume": "Le management de proximité est l’une de nos forces : donnons-lui les moyens d’agir !",
+      "fichier": "tracts/2026-11-18-communication-managers.pdf",
+      "apercu": "tracts/2026-11-18-communication-managers-apercu.jpg",
+      "type": "pdf",
+      "publie_le": "2026-11-18T19:38:13.522Z",
+      "video": "tracts/2026-11-18-communication-managers-video.mp4",
+      "video_apercu": "tracts/2026-11-18-communication-managers-video.jpg",
+      "video_duree": 75,
+      "video_largeur": 1920,
+      "video_hauteur": 1080
+    },
+    {
       "id": "2026-11-15-communication-paris-poles-et-br",
       "titre": "Communication Paris, Pôles et BR",
       "date": "2026-11-15",

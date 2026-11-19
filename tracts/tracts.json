@@ -1,6 +1,21 @@
 {
   "tracts": [
     {
+      "id": "2026-11-19-communication-fin-de-campagne-1er-tour",
+      "titre": "Communication fin de campagne 1er tour",
+      "date": "2026-11-19",
+      "resume": "MERCI POUR VOTRE ÉCOUTE, VOTRE PATIENCE ET VOTRE SOUTIEN TOUT AU LONG DE CETTE CAMPAGNE ! \nFAITES-NOUS CONFIANCE, SOUTENEZ-NOUS ENCORE UNE FOIS :\nPLUS FORTS ENSEMBLE, JOUONS COLLECTIF ! VOTEZ CFTC !",
+      "fichier": "tracts/2026-11-19-communication-fin-de-campagne-1er-tour.pdf",
+      "apercu": "tracts/2026-11-19-communication-fin-de-campagne-1er-tour-apercu.jpg",
+      "type": "pdf",
+      "publie_le": "2026-11-19T20:34:16.843Z",
+      "video": "tracts/2026-11-19-communication-fin-de-campagne-1er-tour-video.mp4",
+      "video_apercu": "tracts/2026-11-19-communication-fin-de-campagne-1er-tour-video.jpg",
+      "video_duree": 86,
+      "video_largeur": 1920,
+      "video_hauteur": 1080
+    },
+    {
       "id": "2026-11-18-communication-dsi",
       "titre": "Communication DSI",
       "date": "2026-11-18",
